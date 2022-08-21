@@ -1,29 +1,18 @@
-using MetadataExtractor;
-using MetadataExtractor.Formats.Exif;
-using MetadataExtractor.Formats.FileType;
-using MetadataExtractor.Formats.QuickTime;
+using ImageFileSorter.Infrastructure.Models;
 using System.ComponentModel;
-using System.Globalization;
 
-namespace FileSorter
+namespace ImageFileSorter
 {
     public partial class ImageSorterForm : Form
     {
-        string sourcePath;
-        string targetPath;
+        string? sourcePath;
+        string? targetPath;
 
-        static readonly string jpegFileTypeName = "JPEG";
-        static readonly string jpegDateFormat = "yyyy:MM:dd HH:mm:ss";
-
-        static readonly string mp4FileTypeName = "MP4";
-        static readonly string mp4DateFormat = "ddd MMM dd HH:mm:ss yyyy";
-
-        int fileCount;
         bool isProcessing;
         bool isCancelled;
         bool isError;
 
-        BackgroundWorker worker;
+        BackgroundWorker? worker;
 
         public ImageSorterForm()
         {
@@ -42,13 +31,15 @@ namespace FileSorter
         {
             worker = sender as BackgroundWorker;
 
-            if (worker == null)
+            if (sourcePath == null || targetPath == null || worker == null)
                 return;
 
             worker.ReportProgress(0, new UserState($"Source folder {sourcePath}"));
             worker.ReportProgress(0, new UserState($"Target folder {targetPath}"));
 
-            Sort();
+            var sorter = new FileSorter(sourcePath, targetPath, worker);
+
+            sorter.Sort();
         }
 
         private void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -60,13 +51,13 @@ namespace FileSorter
                 if (state == null)
                     return;
 
-                if (state.Sucess)
+                if (state.IsSucess)
                 {
-                    Log($"{state.Message}");
+                    Log($"{state.CreatedOn.ToString("HH:mm:ss:fff") + " : " + state.Message}");
                 }
                 else
                 {
-                    LogError($"{state.Message}");
+                    LogError($"{state.CreatedOn.ToString("HH:mm:ss:fff") + " : " + state.Message}");
                 }
 
             }
@@ -115,7 +106,7 @@ namespace FileSorter
         {
             using var fbd = new FolderBrowserDialog();
             fbd.InitialDirectory = targetPath;
-            DialogResult result = fbd.ShowDialog();
+            var result = fbd.ShowDialog();
 
             if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
             {
@@ -128,13 +119,19 @@ namespace FileSorter
         {
             if (string.IsNullOrWhiteSpace(sourcePath) || string.IsNullOrWhiteSpace(targetPath))
             {
-                HandleValidationError("Invalid folder locations");
+                HandleValidationError("Empty folder locations");
                 return;
             }
 
-            if (sourcePath == targetPath)
+            //if (sourcePath.StartsWith(targetPath) || targetPath.StartsWith(sourcePath))
+            //{
+            //    HandleValidationError("Invalid Source & Target folder");
+            //    return;
+            //}
+
+            if (!Directory.Exists(sourcePath))
             {
-                HandleValidationError("Source and destination folders should be different");
+                HandleValidationError($"'{sourcePath}' is not a valid directory.");
                 return;
             }
 
@@ -145,6 +142,9 @@ namespace FileSorter
                     isError = false;
                     isCancelled = true;
                     backgroundWorker.CancelAsync();
+
+                    btnProcess.Text = "Cancelling...";
+                    btnProcess.Enabled = false;
                 }
             }
             else
@@ -163,7 +163,7 @@ namespace FileSorter
 
         private void HandleValidationError(string message)
         {
-            Log("-----------------------------------------------------------------------------------------------", false);
+            Log("-----------------------------------------------------------------------------------------------");
             LogWarning(message);
         }
 
@@ -171,10 +171,9 @@ namespace FileSorter
         {
             isCancelled = false;
             isProcessing = true;
-            fileCount = 0;
             btnProcess.Text = "Stop Sorting";
 
-            Log("-----------------------------------------------------------------------------------------------", false);
+            Log("-----------------------------------------------------------------------------------------------");
             Log("Sorting started");
         }
 
@@ -183,159 +182,42 @@ namespace FileSorter
             btnProcess.Text = "Sort";
             isProcessing = false;
 
+            btnProcess.Enabled = true;
+
             Log(message);
         }
 
-        private void Log(string message, bool logTime = true)
+        private void Log(string message)
         {
-            if (logTime)
-            {
-                lstLog.Items.Insert(0, message);
-                return;
-            }
-
             lstLog.Items.Insert(0, message);
         }
 
         private void LogWarning(string message)
         {
-            ListViewItem li = new ListViewItem();
-            li.ForeColor = Color.OrangeRed;
-            li.Text = message;
-            lstLog.Items.Insert(0, li);
+            lstLog.Items.Insert(0, new ListViewItem
+            {
+                ForeColor = Color.OrangeRed,
+                Text = message
+            });
         }
 
 
         private void LogError(string message)
         {
-            ListViewItem li = new ListViewItem();
-            li.ForeColor = Color.Red;
-            li.Text = message;
-            lstLog.Items.Insert(0, li);
+            lstLog.Items.Insert(0, new ListViewItem
+            {
+                ForeColor = Color.Red,
+                Text = message
+            });
         }
 
         #endregion
 
         #region Process
 
-        public void ProcessDirectory(string targetDirectory)
-        {
-            string[] fileEntries = System.IO.Directory.GetFiles(targetDirectory);
-            foreach (string fileName in fileEntries)
-            {
-                if (worker.CancellationPending == true)
-                {
-                    return;
-                }
 
-                ProcessFile(fileName);
-            }
-
-            string[] subdirectoryEntries = System.IO.Directory.GetDirectories(targetDirectory);
-            foreach (string subdirectory in subdirectoryEntries)
-            {
-                if (worker.CancellationPending == true)
-                {
-                    return;
-                }
-
-                ProcessDirectory(subdirectory);
-            }
-
-        }
-
-        public void ProcessFile(string sourceFilePath)
-        {
-            fileCount++;
-
-            var fileName = Path.GetFileName(sourceFilePath);
-
-            try
-            {
-                worker.ReportProgress(0, new UserState($"File {fileCount} : {fileName}"));
-
-                IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(sourceFilePath);
-
-                var fileType = directories.OfType<FileTypeDirectory>().FirstOrDefault()?.GetDescription(FileTypeDirectory.TagDetectedFileTypeName);
-
-                var isSuccess = false;
-                DateTime createdDateTime = default;
-                string? dateTime;
-
-                if (fileType == jpegFileTypeName)
-                {
-                    dateTime = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault()?.GetDescription(ExifDirectoryBase.TagDateTimeOriginal);
-                    isSuccess = DateTime.TryParseExact(dateTime, jpegDateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out createdDateTime);
-                }
-                else if (fileType == mp4FileTypeName)
-                {
-                    dateTime = directories.OfType<QuickTimeMovieHeaderDirectory>().FirstOrDefault()?.GetDescription(QuickTimeMovieHeaderDirectory.TagCreated);
-                    isSuccess = DateTime.TryParseExact(dateTime, mp4DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out createdDateTime);
-                }
-
-                if (!isSuccess || createdDateTime == default)
-                {
-                    worker.ReportProgress(0, new UserState($"File '{fileName}' sorting failed", false));
-                    return;
-                }
-
-                var destFolder = Path.Combine(targetPath, createdDateTime.Year.ToString(),
-                                                            createdDateTime.Year.ToString() + "." +
-                                                            createdDateTime.Month.ToString().PadLeft(2, '0') + "." +
-                                                            createdDateTime.Day.ToString().PadLeft(2, '0'));
-
-                System.IO.Directory.CreateDirectory(destFolder);
-
-                string destFilePath = Path.Combine(destFolder, fileName);
-                File.Copy(sourceFilePath, destFilePath, true);
-
-                worker.ReportProgress(0, new UserState($"File copied to '{destFolder}'"));
-
-            }
-            catch (Exception)
-            {
-                worker.ReportProgress(0, new UserState($"Error occured while sorting file '{fileName}'", false));
-                return;
-            }
-        }
-
-        private void Sort()
-        {
-            if (System.IO.Directory.Exists(sourcePath))
-            {
-                ProcessDirectory(sourcePath);
-            }
-            else
-            {
-                isError = true;
-                worker.ReportProgress(0, new UserState($"'{sourcePath}' is not a valid directory."));
-            }
-        }
 
         #endregion
 
-    }
-
-    public class ListBoxItem
-    {
-        public ListBoxItem(Color c, string m)
-        {
-            ItemColor = c;
-            Message = m;
-        }
-        public Color ItemColor { get; set; }
-        public string Message { get; set; }
-    }
-
-    public class UserState
-    {
-        public UserState(string message, bool sucess = true)
-        {
-            Message = message;
-            Sucess = sucess;
-        }
-
-        public string Message { get; set; }
-        public bool Sucess { get; set; }
     }
 }

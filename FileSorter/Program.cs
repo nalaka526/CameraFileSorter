@@ -1,4 +1,4 @@
-namespace FileSorter
+namespace ImageFileSorter
 {
     internal static class Program
     {

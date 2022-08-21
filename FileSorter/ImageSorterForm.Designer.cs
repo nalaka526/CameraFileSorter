@@ -1,4 +1,4 @@
-﻿namespace FileSorter
+﻿namespace ImageFileSorter
 {
     partial class ImageSorterForm
     {
