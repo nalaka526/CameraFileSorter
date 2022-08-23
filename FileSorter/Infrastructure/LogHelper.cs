@@ -11,7 +11,7 @@
 
         public static string GetSTargetFolderPathMessage(string targetFolderPath)
             => $"Target folder : {targetFolderPath}";
-        
+
         public static string GetSessionCancelMessage()
             => "Error occured";
 

@@ -9,7 +9,7 @@ namespace ImageFileSorter
 {
     public class FileSorter
     {
-        Session CurrentSession;
+        readonly Session CurrentSession;
 
         static readonly string jpegFileTypeName = "JPEG";
         static readonly string jpegDateFormat = "yyyy:MM:dd HH:mm:ss";

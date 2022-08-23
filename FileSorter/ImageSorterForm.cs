@@ -6,8 +6,8 @@ namespace ImageFileSorter
 {
     public partial class ImageSorterForm : Form
     {
-        string sourcePath;
-        string targetPath;
+        string? sourcePath;
+        string? targetPath;
 
         bool isProcessing;
         bool isCancelled;
@@ -28,11 +28,11 @@ namespace ImageFileSorter
 
         #region Background Worker
 
-        private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             worker = sender as BackgroundWorker;
 
-            if (worker == null)
+            if (sourcePath == null || targetPath == null || worker == null)
                 return;
 
             var sorter = new FileSorter(new Session(sourcePath, targetPath, worker));
@@ -40,31 +40,28 @@ namespace ImageFileSorter
             sorter.Sort();
         }
 
-        private void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            if (e.UserState is UserState)
+
+            if (e.UserState is not UserState state)
+                return;
+
+            if (state.IsSucess)
             {
-                var state = e.UserState as UserState;
-
-                if (state == null)
-                    return;
-
-                if (state.IsSucess)
-                {
-                    Log($"{state.Message}");
-                }
-                else if (state.IsWarning)
-                {
-                    LogWarning($"{state.Message}");
-                }
-                else
-                {
-                    LogError($"{state.Message}");
-                }
+                Log($"{state.Message}");
             }
+            else if (state.IsWarning)
+            {
+                LogWarning($"{state.Message}");
+            }
+            else
+            {
+                LogError($"{state.Message}");
+            }
+
         }
 
-        private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             btnProcess.Text = "Sort";
             isProcessing = false;
@@ -89,7 +86,7 @@ namespace ImageFileSorter
 
         #region User Events
 
-        private void btnSourceFolder_Click(object sender, EventArgs e)
+        private void BtnSourceFolder_Click(object sender, EventArgs e)
         {
             using var fbd = new FolderBrowserDialog();
             fbd.InitialDirectory = sourcePath;
@@ -108,7 +105,7 @@ namespace ImageFileSorter
             }
         }
 
-        private void btnTargetFolder_Click(object sender, EventArgs e)
+        private void BtnTargetFolder_Click(object sender, EventArgs e)
         {
             using var fbd = new FolderBrowserDialog();
             fbd.InitialDirectory = targetPath;
@@ -121,7 +118,7 @@ namespace ImageFileSorter
             }
         }
 
-        private void btnProcess_Click(object sender, EventArgs e)
+        private void BtnProcess_Click(object sender, EventArgs e)
         {
             if (isProcessing)
             {
@@ -165,21 +162,21 @@ namespace ImageFileSorter
 
             if (string.IsNullOrWhiteSpace(sourcePath) || string.IsNullOrWhiteSpace(targetPath))
             {
-                LogWarning(LogHelper.GetSeperaotor());
+                Log(LogHelper.GetSeperaotor());
                 LogWarning(LogHelper.GetValidationEmptyFolderPathsMessage());
                 return false;
             }
 
             if (sourcePath.StartsWith(targetPath) || targetPath.StartsWith(sourcePath))
             {
-                LogWarning(LogHelper.GetSeperaotor());
+                Log(LogHelper.GetSeperaotor());
                 LogWarning(LogHelper.GetValidationInvalidFolderPathsMessage());
                 return false;
             }
 
             if (!Directory.Exists(sourcePath))
             {
-                LogWarning(LogHelper.GetSeperaotor());
+                Log(LogHelper.GetSeperaotor());
                 LogWarning(LogHelper.GetValidationInvalidSourceFolderPathMessage(sourcePath));
                 return false;
             }

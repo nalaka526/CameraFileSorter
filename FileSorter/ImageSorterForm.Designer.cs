@@ -46,7 +46,7 @@
             this.btnProcess.TabIndex = 0;
             this.btnProcess.Text = "Sort";
             this.btnProcess.UseVisualStyleBackColor = true;
-            this.btnProcess.Click += new System.EventHandler(this.btnProcess_Click);
+            this.btnProcess.Click += new System.EventHandler(this.BtnProcess_Click);
             // 
             // btnSourceFolder
             // 
@@ -56,7 +56,7 @@
             this.btnSourceFolder.TabIndex = 3;
             this.btnSourceFolder.Text = "Source";
             this.btnSourceFolder.UseVisualStyleBackColor = true;
-            this.btnSourceFolder.Click += new System.EventHandler(this.btnSourceFolder_Click);
+            this.btnSourceFolder.Click += new System.EventHandler(this.BtnSourceFolder_Click);
             // 
             // btnTargetFolder
             // 
@@ -66,7 +66,7 @@
             this.btnTargetFolder.TabIndex = 4;
             this.btnTargetFolder.Text = "Target";
             this.btnTargetFolder.UseVisualStyleBackColor = true;
-            this.btnTargetFolder.Click += new System.EventHandler(this.btnTargetFolder_Click);
+            this.btnTargetFolder.Click += new System.EventHandler(this.BtnTargetFolder_Click);
             // 
             // txtSourceFolder
             // 
@@ -88,9 +88,9 @@
             // 
             // backgroundWorker
             // 
-            this.backgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker_DoWork);
-            this.backgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker_ProgressChanged);
-            this.backgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker_RunWorkerCompleted);
+            this.backgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.BackgroundWorker_DoWork);
+            this.backgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.BackgroundWorker_ProgressChanged);
+            this.backgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.BackgroundWorker_RunWorkerCompleted);
             // 
             // lstLog
             // 
