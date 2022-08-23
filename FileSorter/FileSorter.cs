@@ -1,17 +1,15 @@
-﻿using ImageFileSorter.Infrastructure.Models;
+﻿using ImageFileSorter.Infrastructure;
 using MetadataExtractor;
 using MetadataExtractor.Formats.Exif;
 using MetadataExtractor.Formats.FileType;
 using MetadataExtractor.Formats.QuickTime;
-using System.ComponentModel;
 using System.Globalization;
 
 namespace ImageFileSorter
 {
     public class FileSorter
     {
-        public string SourcePath { get; set; }
-        public string TargetPath { get; set; }
+        Session CurrentSession;
 
         static readonly string jpegFileTypeName = "JPEG";
         static readonly string jpegDateFormat = "yyyy:MM:dd HH:mm:ss";
@@ -21,22 +19,18 @@ namespace ImageFileSorter
 
         int fileCount;
 
-        DateTime? lastDate;
+        DateTime lastDate = default;
         string? destFolder;
 
-        readonly BackgroundWorker Worker;
-
-        public FileSorter(string sourcePath, string targetPath, BackgroundWorker worker)
+        public FileSorter(Session currentSession)
         {
-            SourcePath = sourcePath;
-            TargetPath = targetPath;
-            Worker = worker;
+            CurrentSession = currentSession;
         }
 
         public void Sort()
         {
             fileCount = 0;
-            ProcessDirectory(SourcePath);
+            ProcessDirectory(CurrentSession.SourcePath);
         }
 
         public void ProcessDirectory(string targetDirectory)
@@ -44,7 +38,7 @@ namespace ImageFileSorter
             string[] fileEntries = System.IO.Directory.GetFiles(targetDirectory);
             foreach (string fileName in fileEntries)
             {
-                if (Worker.CancellationPending == true)
+                if (CurrentSession.Worker.CancellationPending == true)
                 {
                     return;
                 }
@@ -73,7 +67,7 @@ namespace ImageFileSorter
 
             try
             {
-                Worker.ReportProgress(0, new UserState($"File {fileCount} : {fileName}"));
+                CurrentSession.HandleFileProcessingStart(fileCount, fileName);
 
                 IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(sourceFilePath);
 
@@ -96,14 +90,13 @@ namespace ImageFileSorter
 
                 if (!isSuccess || createdDateTime == default)
                 {
-                    Worker.ReportProgress(0, new UserState($"File '{fileName}' sorting failed", false));
+                    CurrentSession.HandleFileProcessingFail();
                     return;
                 }
 
-
-                if (lastDate?.Date != createdDateTime.Date)
+                if (lastDate.Date != createdDateTime.Date || destFolder == null)
                 {
-                    destFolder = Path.Combine(TargetPath, createdDateTime.Year.ToString(),
+                    destFolder = Path.Combine(CurrentSession.TargetPath, createdDateTime.Year.ToString(),
                                             createdDateTime.Year.ToString() + "." +
                                             createdDateTime.Month.ToString().PadLeft(2, '0') + "." +
                                             createdDateTime.Day.ToString().PadLeft(2, '0'));
@@ -113,17 +106,15 @@ namespace ImageFileSorter
                     lastDate = createdDateTime;
                 }
 
-
-
                 string destFilePath = Path.Combine(destFolder, fileName);
                 File.Copy(sourceFilePath, destFilePath, true);
 
-                Worker.ReportProgress(0, new UserState($"File copied to '{destFolder}'"));
+                CurrentSession.HandleFileProcessingSucess();
 
             }
             catch (Exception)
             {
-                Worker.ReportProgress(0, new UserState($"Error occured while sorting file '{fileName}'", false));
+                CurrentSession.HandleFileProcessingError();
                 return;
             }
         }

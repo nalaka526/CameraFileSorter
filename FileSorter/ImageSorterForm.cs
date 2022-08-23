@@ -1,3 +1,4 @@
+using ImageFileSorter.Infrastructure;
 using ImageFileSorter.Infrastructure.Models;
 using System.ComponentModel;
 
@@ -5,14 +6,14 @@ namespace ImageFileSorter
 {
     public partial class ImageSorterForm : Form
     {
-        string? sourcePath;
-        string? targetPath;
+        string sourcePath;
+        string targetPath;
 
         bool isProcessing;
         bool isCancelled;
         bool isError;
 
-        BackgroundWorker? worker;
+        internal BackgroundWorker? worker;
 
         public ImageSorterForm()
         {
@@ -31,13 +32,10 @@ namespace ImageFileSorter
         {
             worker = sender as BackgroundWorker;
 
-            if (sourcePath == null || targetPath == null || worker == null)
+            if (worker == null)
                 return;
 
-            worker.ReportProgress(0, new UserState($"Source folder {sourcePath}"));
-            worker.ReportProgress(0, new UserState($"Target folder {targetPath}"));
-
-            var sorter = new FileSorter(sourcePath, targetPath, worker);
+            var sorter = new FileSorter(new Session(sourcePath, targetPath, worker));
 
             sorter.Sort();
         }
@@ -53,29 +51,37 @@ namespace ImageFileSorter
 
                 if (state.IsSucess)
                 {
-                    Log($"{state.CreatedOn.ToString("HH:mm:ss:fff") + " : " + state.Message}");
+                    Log($"{state.Message}");
+                }
+                else if (state.IsWarning)
+                {
+                    LogWarning($"{state.Message}");
                 }
                 else
                 {
-                    LogError($"{state.CreatedOn.ToString("HH:mm:ss:fff") + " : " + state.Message}");
+                    LogError($"{state.Message}");
                 }
-
             }
         }
 
         private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            btnProcess.Text = "Sort";
+            isProcessing = false;
+
+            btnProcess.Enabled = true;
+
             if (isError)
             {
-                HandleProcessEnd("Error occured");
+                LogError(LogHelper.GetSessionErrorMessage());
             }
             else if (isCancelled)
             {
-                HandleProcessEnd("Sorting canceled");
+                LogWarning(LogHelper.GetSessionCancelMessage());
             }
             else
             {
-                HandleProcessEnd("Sorting completed");
+                Log(LogHelper.GetSessionSucessMessage());
             }
         }
 
@@ -117,24 +123,6 @@ namespace ImageFileSorter
 
         private void btnProcess_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(sourcePath) || string.IsNullOrWhiteSpace(targetPath))
-            {
-                HandleValidationError("Empty folder locations");
-                return;
-            }
-
-            //if (sourcePath.StartsWith(targetPath) || targetPath.StartsWith(sourcePath))
-            //{
-            //    HandleValidationError("Invalid Source & Target folder");
-            //    return;
-            //}
-
-            if (!Directory.Exists(sourcePath))
-            {
-                HandleValidationError($"'{sourcePath}' is not a valid directory.");
-                return;
-            }
-
             if (isProcessing)
             {
                 if (backgroundWorker.WorkerSupportsCancellation == true)
@@ -151,40 +139,52 @@ namespace ImageFileSorter
             {
                 if (backgroundWorker.IsBusy != true)
                 {
-                    HandleProcessStart();
-                    this.backgroundWorker.RunWorkerAsync();
+                    if (ValidateProcessStart())
+                    {
+                        Log(LogHelper.GetSeperaotor());
+                        Log(LogHelper.GetSessionStartMessage());
+                        Log(LogHelper.GetSourceFolderPathMessage(sourcePath));
+                        Log(LogHelper.GetSTargetFolderPathMessage(targetPath));
+
+                        isCancelled = false;
+                        isProcessing = true;
+                        btnProcess.Text = "Stop Sorting";
+
+                        this.backgroundWorker.RunWorkerAsync();
+                    }
                 }
             }
         }
 
         #endregion
 
-        #region Support
+        #region Other
 
-        private void HandleValidationError(string message)
+        private bool ValidateProcessStart()
         {
-            Log("-----------------------------------------------------------------------------------------------");
-            LogWarning(message);
-        }
 
-        private void HandleProcessStart()
-        {
-            isCancelled = false;
-            isProcessing = true;
-            btnProcess.Text = "Stop Sorting";
+            if (string.IsNullOrWhiteSpace(sourcePath) || string.IsNullOrWhiteSpace(targetPath))
+            {
+                LogWarning(LogHelper.GetSeperaotor());
+                LogWarning(LogHelper.GetValidationEmptyFolderPathsMessage());
+                return false;
+            }
 
-            Log("-----------------------------------------------------------------------------------------------");
-            Log("Sorting started");
-        }
+            if (sourcePath.StartsWith(targetPath) || targetPath.StartsWith(sourcePath))
+            {
+                LogWarning(LogHelper.GetSeperaotor());
+                LogWarning(LogHelper.GetValidationInvalidFolderPathsMessage());
+                return false;
+            }
 
-        private void HandleProcessEnd(string message)
-        {
-            btnProcess.Text = "Sort";
-            isProcessing = false;
+            if (!Directory.Exists(sourcePath))
+            {
+                LogWarning(LogHelper.GetSeperaotor());
+                LogWarning(LogHelper.GetValidationInvalidSourceFolderPathMessage(sourcePath));
+                return false;
+            }
 
-            btnProcess.Enabled = true;
-
-            Log(message);
+            return true;
         }
 
         private void Log(string message)
@@ -210,10 +210,6 @@ namespace ImageFileSorter
                 Text = message
             });
         }
-
-        #endregion
-
-        #region Process
 
 
 
