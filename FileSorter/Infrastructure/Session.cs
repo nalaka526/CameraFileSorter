@@ -7,15 +7,24 @@ namespace ImageFileSorter.Infrastructure
     {
         internal string SourcePath { get; set; }
         internal string TargetPath { get; set; }
+
+        internal string DateSeperator { get; set; }
+        internal bool CreateFolderForYear { get; set; }
+        internal bool CreateFolderForMonth { get; set; }
+
+
         internal BackgroundWorker Worker;
 
         int currentFileIndex;
         string currentFileName;
 
-        public Session(string sourcePath, string targetPath, BackgroundWorker worker)
+        public Session(string sourcePath, string targetPath, string dateSeperator, bool createFolderForYear,  bool createFolderForMonth, BackgroundWorker worker)
         {
             SourcePath = sourcePath;
             TargetPath = targetPath;
+            CreateFolderForYear = createFolderForYear;
+            CreateFolderForMonth = createFolderForMonth;
+            DateSeperator = dateSeperator;
             Worker = worker;
         }
 

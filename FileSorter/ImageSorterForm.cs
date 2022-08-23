@@ -1,3 +1,4 @@
+using Image_File_Sorter.Infrastructure;
 using ImageFileSorter.Infrastructure;
 using ImageFileSorter.Infrastructure.Models;
 using System.ComponentModel;
@@ -22,6 +23,9 @@ namespace ImageFileSorter
             backgroundWorker.WorkerReportsProgress = true;
             backgroundWorker.WorkerSupportsCancellation = true;
 
+            sourcePath = @"E:\Temp\Test\Source S";
+            targetPath = @"E:\Temp\Test\Target";
+
             txtSourceFolder.Text = sourcePath;
             txtTargetFolder.Text = targetPath;
         }
@@ -35,7 +39,7 @@ namespace ImageFileSorter
             if (sourcePath == null || targetPath == null || worker == null)
                 return;
 
-            var sorter = new FileSorter(new Session(sourcePath, targetPath, worker));
+            var sorter = new FileSorter(new Session(sourcePath, targetPath, txtDateSeperator.Text, chkYearFolder.Checked, chkMonthFolder.Checked, worker));
 
             sorter.Sort();
         }
@@ -198,7 +202,6 @@ namespace ImageFileSorter
             });
         }
 
-
         private void LogError(string message)
         {
             lstLog.Items.Insert(0, new ListViewItem
@@ -208,9 +211,12 @@ namespace ImageFileSorter
             });
         }
 
-
-
         #endregion
 
+        private void chkYearFolder_CheckedChanged(object sender, EventArgs e)
+        {
+            chkMonthFolder.Enabled = chkYearFolder.Checked;
+            chkMonthFolder.Checked = chkYearFolder.Checked;
+        }
     }
 }

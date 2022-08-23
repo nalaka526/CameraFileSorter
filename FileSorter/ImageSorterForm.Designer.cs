@@ -36,6 +36,11 @@
             this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
             this.lstLog = new System.Windows.Forms.ListView();
             this.Item = new System.Windows.Forms.ColumnHeader();
+            this.chkYearFolder = new System.Windows.Forms.CheckBox();
+            this.chkMonthFolder = new System.Windows.Forms.CheckBox();
+            this.lblCreateFoldersFor = new System.Windows.Forms.Label();
+            this.lblDateSeperaotor = new System.Windows.Forms.Label();
+            this.txtDateSeperator = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // btnProcess
@@ -99,9 +104,9 @@
             this.Item});
             this.lstLog.GridLines = true;
             this.lstLog.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.lstLog.Location = new System.Drawing.Point(9, 68);
+            this.lstLog.Location = new System.Drawing.Point(9, 150);
             this.lstLog.Name = "lstLog";
-            this.lstLog.Size = new System.Drawing.Size(504, 361);
+            this.lstLog.Size = new System.Drawing.Size(504, 279);
             this.lstLog.TabIndex = 7;
             this.lstLog.UseCompatibleStateImageBehavior = false;
             this.lstLog.View = System.Windows.Forms.View.Details;
@@ -111,12 +116,67 @@
             this.Item.Text = "";
             this.Item.Width = 500;
             // 
+            // chkYearFolder
+            // 
+            this.chkYearFolder.AutoSize = true;
+            this.chkYearFolder.Checked = true;
+            this.chkYearFolder.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkYearFolder.Location = new System.Drawing.Point(12, 103);
+            this.chkYearFolder.Name = "chkYearFolder";
+            this.chkYearFolder.Size = new System.Drawing.Size(48, 19);
+            this.chkYearFolder.TabIndex = 8;
+            this.chkYearFolder.Text = "Year";
+            this.chkYearFolder.UseVisualStyleBackColor = true;
+            this.chkYearFolder.CheckedChanged += new System.EventHandler(this.chkYearFolder_CheckedChanged);
+            // 
+            // chkMonthFolder
+            // 
+            this.chkMonthFolder.AutoSize = true;
+            this.chkMonthFolder.Location = new System.Drawing.Point(66, 103);
+            this.chkMonthFolder.Name = "chkMonthFolder";
+            this.chkMonthFolder.Size = new System.Drawing.Size(62, 19);
+            this.chkMonthFolder.TabIndex = 9;
+            this.chkMonthFolder.Text = "Month";
+            this.chkMonthFolder.UseVisualStyleBackColor = true;
+            // 
+            // lblCreateFoldersFor
+            // 
+            this.lblCreateFoldersFor.AutoSize = true;
+            this.lblCreateFoldersFor.Location = new System.Drawing.Point(12, 81);
+            this.lblCreateFoldersFor.Name = "lblCreateFoldersFor";
+            this.lblCreateFoldersFor.Size = new System.Drawing.Size(101, 15);
+            this.lblCreateFoldersFor.TabIndex = 10;
+            this.lblCreateFoldersFor.Text = "Create  folders for";
+            // 
+            // lblDateSeperaotor
+            // 
+            this.lblDateSeperaotor.AutoSize = true;
+            this.lblDateSeperaotor.Location = new System.Drawing.Point(167, 81);
+            this.lblDateSeperaotor.Name = "lblDateSeperaotor";
+            this.lblDateSeperaotor.Size = new System.Drawing.Size(84, 15);
+            this.lblDateSeperaotor.TabIndex = 11;
+            this.lblDateSeperaotor.Text = "Date Seperator";
+            // 
+            // txtDateSeperator
+            // 
+            this.txtDateSeperator.Location = new System.Drawing.Point(167, 105);
+            this.txtDateSeperator.MaxLength = 1;
+            this.txtDateSeperator.Name = "txtDateSeperator";
+            this.txtDateSeperator.Size = new System.Drawing.Size(68, 23);
+            this.txtDateSeperator.TabIndex = 12;
+            this.txtDateSeperator.Text = ".";
+            // 
             // ImageSorterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(519, 441);
+            this.Controls.Add(this.txtDateSeperator);
+            this.Controls.Add(this.lblDateSeperaotor);
+            this.Controls.Add(this.lblCreateFoldersFor);
+            this.Controls.Add(this.chkMonthFolder);
+            this.Controls.Add(this.chkYearFolder);
             this.Controls.Add(this.lstLog);
             this.Controls.Add(this.txtTargetFolder);
             this.Controls.Add(this.txtSourceFolder);
@@ -140,5 +200,10 @@
         private System.ComponentModel.BackgroundWorker backgroundWorker;
         private ListView lstLog;
         private ColumnHeader Item;
+        private CheckBox chkYearFolder;
+        private CheckBox chkMonthFolder;
+        private Label lblCreateFoldersFor;
+        private Label lblDateSeperaotor;
+        private TextBox txtDateSeperator;
     }
 }

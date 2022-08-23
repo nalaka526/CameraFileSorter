@@ -96,9 +96,11 @@ namespace ImageFileSorter
 
                 if (lastDate.Date != createdDateTime.Date || destFolder == null)
                 {
-                    destFolder = Path.Combine(CurrentSession.TargetPath, createdDateTime.Year.ToString(),
-                                            createdDateTime.Year.ToString() + "." +
-                                            createdDateTime.Month.ToString().PadLeft(2, '0') + "." +
+                    destFolder = Path.Combine(CurrentSession.TargetPath,
+                                            CurrentSession.CreateFolderForYear ? createdDateTime.Year.ToString() : string.Empty,
+                                            CurrentSession.CreateFolderForMonth ? createdDateTime.Month.ToString().PadLeft(2, '0') : string.Empty,
+                                            createdDateTime.Year.ToString() + CurrentSession.DateSeperator +
+                                            createdDateTime.Month.ToString().PadLeft(2, '0') + CurrentSession.DateSeperator +
                                             createdDateTime.Day.ToString().PadLeft(2, '0'));
 
                     System.IO.Directory.CreateDirectory(destFolder);
