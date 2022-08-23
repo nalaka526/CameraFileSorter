@@ -167,9 +167,31 @@ namespace ImageFileSorter
             }
         }
 
+        private void ChkYearFolder_CheckedChanged(object sender, EventArgs e)
+        {
+            chkMonthFolder.Enabled = chkYearFolder.Checked;
+            chkMonthFolder.Checked = false;
+        }
+
         #endregion
 
         #region Other
+
+        private void PopulateFolderNameFormats()
+        {
+            cmbDateSeperator.DisplayMember = "Text";
+            cmbDateSeperator.ValueMember = "Value";
+
+            var items = new[] {
+                new { Text = "ddMMyyyy", Value = string.Empty },
+                new { Text = "dd.MM.yyyy", Value = "." },
+                new { Text = "dd-MM-yyyy", Value = "-" }
+            };
+
+            cmbDateSeperator.DataSource = items;
+
+            cmbDateSeperator.SelectedIndex = 1;
+        }
 
         private bool ValidateProcessStart()
         {
@@ -223,27 +245,5 @@ namespace ImageFileSorter
 
         #endregion
 
-        private void chkYearFolder_CheckedChanged(object sender, EventArgs e)
-        {
-            chkMonthFolder.Enabled = chkYearFolder.Checked;
-            chkMonthFolder.Checked = false;
-        }
-
-        private void PopulateFolderNameFormats()
-        {
-            cmbDateSeperator.DisplayMember = "Text";
-            cmbDateSeperator.ValueMember = "Value";
-
-
-            var items = new[] {
-                new { Text = "ddMMyyyy", Value = string.Empty },
-                new { Text = "dd.MM.yyyy", Value = "." },
-                new { Text = Text = "dd-MM-yyyy", Value = "-" }
-            };
-
-            cmbDateSeperator.DataSource = items;
-
-            cmbDateSeperator.SelectedIndex = 1;
-        }
     }
 }

@@ -12,11 +12,9 @@ namespace ImageFileSorter.Infrastructure
         internal bool CreateFolderForYear { get; set; }
         internal bool CreateFolderForMonth { get; set; }
 
-
         internal BackgroundWorker Worker;
 
         int currentFileIndex;
-
         public int SuccessFilesCount;
         public int FailedFilesCount;
 
@@ -52,7 +50,5 @@ namespace ImageFileSorter.Infrastructure
         {
             Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingErrorMessage(currentFileIndex), false));
         }
-
-
     }
 }

@@ -127,7 +127,7 @@
             this.chkYearFolder.TabIndex = 8;
             this.chkYearFolder.Text = "Year";
             this.chkYearFolder.UseVisualStyleBackColor = true;
-            this.chkYearFolder.CheckedChanged += new System.EventHandler(this.chkYearFolder_CheckedChanged);
+            this.chkYearFolder.CheckedChanged += new System.EventHandler(this.ChkYearFolder_CheckedChanged);
             // 
             // chkMonthFolder
             // 

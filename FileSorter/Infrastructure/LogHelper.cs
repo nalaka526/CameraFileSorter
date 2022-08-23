@@ -3,6 +3,7 @@
     internal static class LogHelper
     {
         #region Session
+
         public static string GetSessionStartMessage()
             => "Sorting started";
 
@@ -38,10 +39,10 @@
             => "Empty folder locations";
 
         public static string GetValidationInvalidFolderPathsMessage()
-            => "Invalid Source & Target folder";
+            => "Invalid Source and/or Target folde(r)";
 
         public static string GetValidationInvalidSourceFolderPathMessage(string sourceFolderPath)
-            => $"'{sourceFolderPath}' is not a valid directory.";
+            => $"'{sourceFolderPath}' is not a valid folder.";
 
         #endregion
 
