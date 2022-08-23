@@ -111,7 +111,7 @@ namespace ImageFileSorter
                 string destFilePath = Path.Combine(destFolder, fileName);
                 File.Copy(sourceFilePath, destFilePath, true);
 
-                CurrentSession.HandleFileProcessingSucess();
+                CurrentSession.HandleFileProcessingSucess(destFolder);
 
             }
             catch (Exception)

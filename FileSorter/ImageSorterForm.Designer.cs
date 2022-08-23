@@ -40,14 +40,14 @@
             this.chkMonthFolder = new System.Windows.Forms.CheckBox();
             this.lblCreateFoldersFor = new System.Windows.Forms.Label();
             this.lblDateSeperaotor = new System.Windows.Forms.Label();
-            this.txtDateSeperator = new System.Windows.Forms.TextBox();
+            this.cmbDateSeperator = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // btnProcess
             // 
-            this.btnProcess.Location = new System.Drawing.Point(419, 13);
+            this.btnProcess.Location = new System.Drawing.Point(428, 13);
             this.btnProcess.Name = "btnProcess";
-            this.btnProcess.Size = new System.Drawing.Size(93, 52);
+            this.btnProcess.Size = new System.Drawing.Size(79, 118);
             this.btnProcess.TabIndex = 0;
             this.btnProcess.Text = "Sort";
             this.btnProcess.UseVisualStyleBackColor = true;
@@ -55,9 +55,9 @@
             // 
             // btnSourceFolder
             // 
-            this.btnSourceFolder.Location = new System.Drawing.Point(334, 13);
+            this.btnSourceFolder.Location = new System.Drawing.Point(14, 13);
             this.btnSourceFolder.Name = "btnSourceFolder";
-            this.btnSourceFolder.Size = new System.Drawing.Size(79, 23);
+            this.btnSourceFolder.Size = new System.Drawing.Size(106, 23);
             this.btnSourceFolder.TabIndex = 3;
             this.btnSourceFolder.Text = "Source";
             this.btnSourceFolder.UseVisualStyleBackColor = true;
@@ -65,9 +65,9 @@
             // 
             // btnTargetFolder
             // 
-            this.btnTargetFolder.Location = new System.Drawing.Point(334, 40);
+            this.btnTargetFolder.Location = new System.Drawing.Point(14, 45);
             this.btnTargetFolder.Name = "btnTargetFolder";
-            this.btnTargetFolder.Size = new System.Drawing.Size(79, 23);
+            this.btnTargetFolder.Size = new System.Drawing.Size(106, 23);
             this.btnTargetFolder.TabIndex = 4;
             this.btnTargetFolder.Text = "Target";
             this.btnTargetFolder.UseVisualStyleBackColor = true;
@@ -76,19 +76,19 @@
             // txtSourceFolder
             // 
             this.txtSourceFolder.BackColor = System.Drawing.SystemColors.Window;
-            this.txtSourceFolder.Location = new System.Drawing.Point(9, 13);
+            this.txtSourceFolder.Location = new System.Drawing.Point(126, 14);
             this.txtSourceFolder.Name = "txtSourceFolder";
             this.txtSourceFolder.ReadOnly = true;
-            this.txtSourceFolder.Size = new System.Drawing.Size(319, 23);
+            this.txtSourceFolder.Size = new System.Drawing.Size(296, 23);
             this.txtSourceFolder.TabIndex = 5;
             // 
             // txtTargetFolder
             // 
             this.txtTargetFolder.BackColor = System.Drawing.SystemColors.Window;
-            this.txtTargetFolder.Location = new System.Drawing.Point(9, 39);
+            this.txtTargetFolder.Location = new System.Drawing.Point(126, 45);
             this.txtTargetFolder.Name = "txtTargetFolder";
             this.txtTargetFolder.ReadOnly = true;
-            this.txtTargetFolder.Size = new System.Drawing.Size(319, 23);
+            this.txtTargetFolder.Size = new System.Drawing.Size(296, 23);
             this.txtTargetFolder.TabIndex = 6;
             // 
             // backgroundWorker
@@ -104,9 +104,9 @@
             this.Item});
             this.lstLog.GridLines = true;
             this.lstLog.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.lstLog.Location = new System.Drawing.Point(9, 150);
+            this.lstLog.Location = new System.Drawing.Point(9, 137);
             this.lstLog.Name = "lstLog";
-            this.lstLog.Size = new System.Drawing.Size(504, 279);
+            this.lstLog.Size = new System.Drawing.Size(504, 292);
             this.lstLog.TabIndex = 7;
             this.lstLog.UseCompatibleStateImageBehavior = false;
             this.lstLog.View = System.Windows.Forms.View.Details;
@@ -121,7 +121,7 @@
             this.chkYearFolder.AutoSize = true;
             this.chkYearFolder.Checked = true;
             this.chkYearFolder.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkYearFolder.Location = new System.Drawing.Point(12, 103);
+            this.chkYearFolder.Location = new System.Drawing.Point(126, 78);
             this.chkYearFolder.Name = "chkYearFolder";
             this.chkYearFolder.Size = new System.Drawing.Size(48, 19);
             this.chkYearFolder.TabIndex = 8;
@@ -132,7 +132,7 @@
             // chkMonthFolder
             // 
             this.chkMonthFolder.AutoSize = true;
-            this.chkMonthFolder.Location = new System.Drawing.Point(66, 103);
+            this.chkMonthFolder.Location = new System.Drawing.Point(177, 78);
             this.chkMonthFolder.Name = "chkMonthFolder";
             this.chkMonthFolder.Size = new System.Drawing.Size(62, 19);
             this.chkMonthFolder.TabIndex = 9;
@@ -142,29 +142,30 @@
             // lblCreateFoldersFor
             // 
             this.lblCreateFoldersFor.AutoSize = true;
-            this.lblCreateFoldersFor.Location = new System.Drawing.Point(12, 81);
+            this.lblCreateFoldersFor.Location = new System.Drawing.Point(14, 79);
             this.lblCreateFoldersFor.Name = "lblCreateFoldersFor";
-            this.lblCreateFoldersFor.Size = new System.Drawing.Size(101, 15);
+            this.lblCreateFoldersFor.Size = new System.Drawing.Size(100, 15);
             this.lblCreateFoldersFor.TabIndex = 10;
-            this.lblCreateFoldersFor.Text = "Create  folders for";
+            this.lblCreateFoldersFor.Text = "Create Folders for";
             // 
             // lblDateSeperaotor
             // 
             this.lblDateSeperaotor.AutoSize = true;
-            this.lblDateSeperaotor.Location = new System.Drawing.Point(167, 81);
+            this.lblDateSeperaotor.Location = new System.Drawing.Point(14, 104);
             this.lblDateSeperaotor.Name = "lblDateSeperaotor";
-            this.lblDateSeperaotor.Size = new System.Drawing.Size(84, 15);
+            this.lblDateSeperaotor.Size = new System.Drawing.Size(103, 15);
             this.lblDateSeperaotor.TabIndex = 11;
-            this.lblDateSeperaotor.Text = "Date Seperator";
+            this.lblDateSeperaotor.Text = "Folder Name Style";
             // 
-            // txtDateSeperator
+            // cmbDateSeperator
             // 
-            this.txtDateSeperator.Location = new System.Drawing.Point(167, 105);
-            this.txtDateSeperator.MaxLength = 1;
-            this.txtDateSeperator.Name = "txtDateSeperator";
-            this.txtDateSeperator.Size = new System.Drawing.Size(68, 23);
-            this.txtDateSeperator.TabIndex = 12;
-            this.txtDateSeperator.Text = ".";
+            this.cmbDateSeperator.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbDateSeperator.FormattingEnabled = true;
+            this.cmbDateSeperator.Location = new System.Drawing.Point(123, 101);
+            this.cmbDateSeperator.MaxLength = 1;
+            this.cmbDateSeperator.Name = "cmbDateSeperator";
+            this.cmbDateSeperator.Size = new System.Drawing.Size(116, 23);
+            this.cmbDateSeperator.TabIndex = 13;
             // 
             // ImageSorterForm
             // 
@@ -172,7 +173,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(519, 441);
-            this.Controls.Add(this.txtDateSeperator);
+            this.Controls.Add(this.cmbDateSeperator);
             this.Controls.Add(this.lblDateSeperaotor);
             this.Controls.Add(this.lblCreateFoldersFor);
             this.Controls.Add(this.chkMonthFolder);
@@ -204,6 +205,6 @@
         private CheckBox chkMonthFolder;
         private Label lblCreateFoldersFor;
         private Label lblDateSeperaotor;
-        private TextBox txtDateSeperator;
+        private ComboBox cmbDateSeperator;
     }
 }

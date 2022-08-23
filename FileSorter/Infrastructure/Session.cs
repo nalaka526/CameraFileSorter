@@ -16,7 +16,9 @@ namespace ImageFileSorter.Infrastructure
         internal BackgroundWorker Worker;
 
         int currentFileIndex;
-        string currentFileName;
+
+        public int SuccessFilesCount;
+        public int FailedFilesCount;
 
         public Session(string sourcePath, string targetPath, string dateSeperator, bool createFolderForYear,  bool createFolderForMonth, BackgroundWorker worker)
         {
@@ -31,18 +33,19 @@ namespace ImageFileSorter.Infrastructure
         public void HandleFileProcessingStart(int fileIndex, string fileName)
         {
             currentFileIndex = fileIndex;
-            currentFileName = fileName;
             Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingStartMessage(fileIndex, fileName)));
         }
 
         public void HandleFileProcessingFail()
         {
+            FailedFilesCount++;
             Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingErrorMessage(currentFileIndex), false));
         }
 
-        public void HandleFileProcessingSucess()
+        public void HandleFileProcessingSucess(string destinationFolder)
         {
-            Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingSucessMessage(currentFileIndex, currentFileName)));
+            SuccessFilesCount++;
+            Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingSucessMessage(currentFileIndex, destinationFolder)));
         }
 
         public void HandleFileProcessingError()

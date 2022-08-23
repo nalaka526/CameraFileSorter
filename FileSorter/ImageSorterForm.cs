@@ -1,4 +1,3 @@
-using Image_File_Sorter.Infrastructure;
 using ImageFileSorter.Infrastructure;
 using ImageFileSorter.Infrastructure.Models;
 using System.ComponentModel;
@@ -9,24 +8,26 @@ namespace ImageFileSorter
     {
         string? sourcePath;
         string? targetPath;
+        string? seperator;
 
         bool isProcessing;
         bool isCancelled;
         bool isError;
 
         internal BackgroundWorker? worker;
+        internal Session currentSession;
 
         public ImageSorterForm()
         {
             InitializeComponent();
 
+            PopulateFolderNameFormats();
+
             backgroundWorker.WorkerReportsProgress = true;
             backgroundWorker.WorkerSupportsCancellation = true;
 
-            sourcePath = @"E:\Temp\Test\Source S";
-            targetPath = @"E:\Temp\Test\Target";
-
             txtSourceFolder.Text = sourcePath;
+            txtTargetFolder.Text = targetPath;
             txtTargetFolder.Text = targetPath;
         }
 
@@ -36,10 +37,17 @@ namespace ImageFileSorter
         {
             worker = sender as BackgroundWorker;
 
-            if (sourcePath == null || targetPath == null || worker == null)
+            if (sourcePath == null || targetPath == null || seperator == null || worker == null)
                 return;
 
-            var sorter = new FileSorter(new Session(sourcePath, targetPath, txtDateSeperator.Text, chkYearFolder.Checked, chkMonthFolder.Checked, worker));
+            currentSession = new Session(sourcePath,
+                                                    targetPath,
+                                                    seperator,
+                                                    chkYearFolder.Checked,
+                                                    chkMonthFolder.Checked,
+                                                    worker);
+
+            var sorter = new FileSorter(currentSession);
 
             sorter.Sort();
         }
@@ -82,6 +90,7 @@ namespace ImageFileSorter
             }
             else
             {
+                Log(LogHelper.GetSessionStatusMessage(currentSession));
                 Log(LogHelper.GetSessionSucessMessage());
             }
         }
@@ -149,6 +158,7 @@ namespace ImageFileSorter
 
                         isCancelled = false;
                         isProcessing = true;
+                        seperator = cmbDateSeperator.SelectedValue.ToString();
                         btnProcess.Text = "Stop Sorting";
 
                         this.backgroundWorker.RunWorkerAsync();
@@ -216,7 +226,24 @@ namespace ImageFileSorter
         private void chkYearFolder_CheckedChanged(object sender, EventArgs e)
         {
             chkMonthFolder.Enabled = chkYearFolder.Checked;
-            chkMonthFolder.Checked = chkYearFolder.Checked;
+            chkMonthFolder.Checked = false;
+        }
+
+        private void PopulateFolderNameFormats()
+        {
+            cmbDateSeperator.DisplayMember = "Text";
+            cmbDateSeperator.ValueMember = "Value";
+
+
+            var items = new[] {
+                new { Text = "ddMMyyyy", Value = string.Empty },
+                new { Text = "dd.MM.yyyy", Value = "." },
+                new { Text = Text = "dd-MM-yyyy", Value = "-" }
+            };
+
+            cmbDateSeperator.DataSource = items;
+
+            cmbDateSeperator.SelectedIndex = 1;
         }
     }
 }
