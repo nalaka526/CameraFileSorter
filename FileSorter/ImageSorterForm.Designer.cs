@@ -45,9 +45,9 @@
             // 
             // btnProcess
             // 
-            this.btnProcess.Location = new System.Drawing.Point(428, 13);
+            this.btnProcess.Location = new System.Drawing.Point(361, 78);
             this.btnProcess.Name = "btnProcess";
-            this.btnProcess.Size = new System.Drawing.Size(79, 118);
+            this.btnProcess.Size = new System.Drawing.Size(152, 46);
             this.btnProcess.TabIndex = 0;
             this.btnProcess.Text = "Sort";
             this.btnProcess.UseVisualStyleBackColor = true;
@@ -79,7 +79,7 @@
             this.txtSourceFolder.Location = new System.Drawing.Point(126, 14);
             this.txtSourceFolder.Name = "txtSourceFolder";
             this.txtSourceFolder.ReadOnly = true;
-            this.txtSourceFolder.Size = new System.Drawing.Size(296, 23);
+            this.txtSourceFolder.Size = new System.Drawing.Size(387, 23);
             this.txtSourceFolder.TabIndex = 5;
             // 
             // txtTargetFolder
@@ -88,7 +88,7 @@
             this.txtTargetFolder.Location = new System.Drawing.Point(126, 45);
             this.txtTargetFolder.Name = "txtTargetFolder";
             this.txtTargetFolder.ReadOnly = true;
-            this.txtTargetFolder.Size = new System.Drawing.Size(296, 23);
+            this.txtTargetFolder.Size = new System.Drawing.Size(387, 23);
             this.txtTargetFolder.TabIndex = 6;
             // 
             // backgroundWorker
@@ -104,9 +104,9 @@
             this.Item});
             this.lstLog.GridLines = true;
             this.lstLog.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.lstLog.Location = new System.Drawing.Point(9, 137);
+            this.lstLog.Location = new System.Drawing.Point(9, 130);
             this.lstLog.Name = "lstLog";
-            this.lstLog.Size = new System.Drawing.Size(504, 292);
+            this.lstLog.Size = new System.Drawing.Size(504, 299);
             this.lstLog.TabIndex = 7;
             this.lstLog.UseCompatibleStateImageBehavior = false;
             this.lstLog.View = System.Windows.Forms.View.Details;
@@ -144,9 +144,9 @@
             this.lblCreateFoldersFor.AutoSize = true;
             this.lblCreateFoldersFor.Location = new System.Drawing.Point(14, 79);
             this.lblCreateFoldersFor.Name = "lblCreateFoldersFor";
-            this.lblCreateFoldersFor.Size = new System.Drawing.Size(100, 15);
+            this.lblCreateFoldersFor.Size = new System.Drawing.Size(82, 15);
             this.lblCreateFoldersFor.TabIndex = 10;
-            this.lblCreateFoldersFor.Text = "Create Folders for";
+            this.lblCreateFoldersFor.Text = "Create Folders";
             // 
             // lblDateSeperaotor
             // 
