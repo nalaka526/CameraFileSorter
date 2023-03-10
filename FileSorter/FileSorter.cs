@@ -91,7 +91,9 @@ namespace ImageFileSorter
                 if (!isSuccess || createdDateTime == default)
                 {
                     CurrentSession.HandleFileProcessingFail();
-                    return;
+
+                    destFolder = Path.Combine(CurrentSession.TargetPath, "Failed");
+                    System.IO.Directory.CreateDirectory(destFolder);
                 }
 
                 if (lastDate.Date != createdDateTime.Date || destFolder == null)
