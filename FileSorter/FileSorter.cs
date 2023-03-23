@@ -87,6 +87,11 @@ namespace ImageFileSorter
                     dateTime = directories.OfType<QuickTimeMovieHeaderDirectory>().FirstOrDefault()?.GetDescription(QuickTimeMovieHeaderDirectory.TagCreated);
                     isSuccess = DateTime.TryParseExact(dateTime, mp4DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out createdDateTime);
                 }
+                else
+                {
+                    CurrentSession.HandleFileSkip();
+                    return;
+                }
 
                 if (!isSuccess || createdDateTime == default)
                 {
@@ -99,11 +104,11 @@ namespace ImageFileSorter
                 if (lastDate.Date != createdDateTime.Date || destFolder == null)
                 {
                     destFolder = Path.Combine(CurrentSession.TargetPath,
-                                            CurrentSession.CreateFolderForYear ? createdDateTime.Year.ToString() : string.Empty,
-                                            CurrentSession.CreateFolderForMonth ? createdDateTime.Month.ToString().PadLeft(2, '0') : string.Empty,
-                                            createdDateTime.Year.ToString() + CurrentSession.DateSeperator +
-                                            createdDateTime.Month.ToString().PadLeft(2, '0') + CurrentSession.DateSeperator +
-                                            createdDateTime.Day.ToString().PadLeft(2, '0'));
+                                                CurrentSession.CreateFolderForYear ? createdDateTime.Year.ToString() : string.Empty,
+                                                CurrentSession.CreateFolderForMonth ? createdDateTime.Month.ToString().PadLeft(2, '0') : string.Empty,
+                                                createdDateTime.Year.ToString() + CurrentSession.DateSeperator +
+                                                createdDateTime.Month.ToString().PadLeft(2, '0') + CurrentSession.DateSeperator +
+                                                createdDateTime.Day.ToString().PadLeft(2, '0'));
 
                     System.IO.Directory.CreateDirectory(destFolder);
 

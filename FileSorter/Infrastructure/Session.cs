@@ -50,5 +50,10 @@ namespace ImageFileSorter.Infrastructure
         {
             Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingErrorMessage(currentFileIndex), false));
         }
+
+        public void HandleFileSkip()
+        {
+            Worker.ReportProgress(0, new UserState(LogHelper.GetFileSkippedMessage(currentFileIndex)));
+        }
     }
 }

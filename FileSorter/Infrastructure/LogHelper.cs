@@ -60,6 +60,9 @@
         public static string GetFileProcessingErrorMessage(int fileIndex)
             => $"{DateTime.Now:HH:mm:ss:fff} : File {fileIndex} : Error occured while sorting file";
 
+        public static string GetFileSkippedMessage(int fileIndex)
+            => $"{DateTime.Now:HH:mm:ss:fff} : File {fileIndex} : Unsupported file type";
+
         #endregion
 
         #region Other
