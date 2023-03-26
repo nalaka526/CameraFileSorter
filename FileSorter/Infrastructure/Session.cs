@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace ImageFileSorter.Infrastructure
 {
-    public class Session
+    internal class Session
     {
         internal string SourcePath { get; set; }
         internal string TargetPath { get; set; }
@@ -34,26 +34,30 @@ namespace ImageFileSorter.Infrastructure
             Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingStartMessage(fileIndex, fileName)));
         }
 
+        public void HandleFileSkip()
+        {
+            Worker.ReportProgress(0, new UserState(LogHelper.GetFileSkippedMessage(currentFileIndex)));
+        }
+
         public void HandleFileProcessingFail()
         {
             FailedFilesCount++;
             Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingErrorMessage(currentFileIndex), false));
         }
 
-        public void HandleFileProcessingSucess(string destinationFolder)
+        public void HandleFileProcessingSucess()
         {
             SuccessFilesCount++;
+        }
+
+        public void HandleFileMovingSuccess(string destinationFolder)
+        {
             Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingSucessMessage(currentFileIndex, destinationFolder)));
         }
 
         public void HandleFileProcessingError()
         {
             Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingErrorMessage(currentFileIndex), false));
-        }
-
-        public void HandleFileSkip()
-        {
-            Worker.ReportProgress(0, new UserState(LogHelper.GetFileSkippedMessage(currentFileIndex)));
         }
     }
 }

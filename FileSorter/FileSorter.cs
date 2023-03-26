@@ -1,26 +1,18 @@
 ﻿using ImageFileSorter.Infrastructure;
+using ImageFileSorter.Infrastructure.FileTypeInfo;
 using MetadataExtractor;
-using MetadataExtractor.Formats.Exif;
 using MetadataExtractor.Formats.FileType;
-using MetadataExtractor.Formats.QuickTime;
-using System.Globalization;
 
 namespace ImageFileSorter
 {
-    public class FileSorter
+    internal class FileSorter
     {
         readonly Session CurrentSession;
-
-        static readonly string jpegFileTypeName = "JPEG";
-        static readonly string jpegDateFormat = "yyyy:MM:dd HH:mm:ss";
-
-        static readonly string mp4FileTypeName = "MP4";
-        static readonly string mp4DateFormat = "ddd MMM dd HH:mm:ss yyyy";
-
         int fileCount;
 
+        List<IFileTypeInfo> fileTypeInfoList = new();
         DateTime lastDate = default;
-        string? destFolder;
+
 
         public FileSorter(Session currentSession)
         {
@@ -30,6 +22,8 @@ namespace ImageFileSorter
         public void Sort()
         {
             fileCount = 0;
+            fileTypeInfoList = new List<IFileTypeInfo> { new JpegInfo(), new Mp4Info() };
+
             ProcessDirectory(CurrentSession.SourcePath);
         }
 
@@ -69,56 +63,54 @@ namespace ImageFileSorter
             {
                 CurrentSession.HandleFileProcessingStart(fileCount, fileName);
 
-                IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(sourceFilePath);
+                string? destFolder = null;
+                string fileExt = Path.GetExtension(sourceFilePath);
 
-                var fileType = directories.OfType<FileTypeDirectory>().FirstOrDefault()?.GetDescription(FileTypeDirectory.TagDetectedFileTypeName);
-
-                var isSuccess = false;
-                DateTime createdDateTime = default;
-                string? dateTime;
-
-                if (fileType == jpegFileTypeName)
+                if (string.IsNullOrWhiteSpace(fileExt) || !fileTypeInfoList.Exists(e => e.FileExtentions.Contains(fileExt)))
                 {
-                    dateTime = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault()?.GetDescription(ExifDirectoryBase.TagDateTimeOriginal);
-                    isSuccess = DateTime.TryParseExact(dateTime, jpegDateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out createdDateTime);
-                }
-                else if (fileType == mp4FileTypeName)
-                {
-                    dateTime = directories.OfType<QuickTimeMovieHeaderDirectory>().FirstOrDefault()?.GetDescription(QuickTimeMovieHeaderDirectory.TagCreated);
-                    isSuccess = DateTime.TryParseExact(dateTime, mp4DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out createdDateTime);
+                    destFolder = Path.Combine(CurrentSession.TargetPath, "NotHandled");
+                    CurrentSession.HandleFileSkip();
                 }
                 else
                 {
-                    CurrentSession.HandleFileSkip();
-                    return;
+                    IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(sourceFilePath);
+
+                    var fileType = directories.OfType<FileTypeDirectory>().FirstOrDefault()?.GetDescription(FileTypeDirectory.TagDetectedFileTypeName);
+
+                    var fileTypeInfo = fileTypeInfoList.Where(e => e.FileTypeName == fileType).FirstOrDefault();
+
+                    if (fileTypeInfo == null)
+                    {
+                        destFolder = Path.Combine(CurrentSession.TargetPath, "NotHandled");
+                        CurrentSession.HandleFileSkip();
+                    }
+                    else
+                    {
+                        var createdDateTime = fileTypeInfo.GetFileCreatedDateTime(directories);
+
+                        if (createdDateTime == default || createdDateTime < new DateTime(1900, 1, 1))
+                        {
+                            destFolder = Path.Combine(CurrentSession.TargetPath, "Failed");
+                            CurrentSession.HandleFileProcessingFail();
+                        }
+                        else if (lastDate.Date != createdDateTime.Date || destFolder == null)
+                        {
+                            destFolder = destFolder = Path.Combine(CurrentSession.TargetPath,
+                                            CurrentSession.CreateFolderForYear ? createdDateTime.Year.ToString() : string.Empty,
+                                            CurrentSession.CreateFolderForMonth ? createdDateTime.Month.ToString().PadLeft(2, '0') : string.Empty,
+                                            createdDateTime.Year.ToString() + CurrentSession.DateSeperator +
+                                            createdDateTime.Month.ToString().PadLeft(2, '0') + CurrentSession.DateSeperator +
+                                            createdDateTime.Day.ToString().PadLeft(2, '0'));
+                            CurrentSession.HandleFileProcessingSucess();
+                            lastDate = createdDateTime;
+                        }
+                    }
                 }
 
-                if (!isSuccess || createdDateTime == default)
-                {
-                    CurrentSession.HandleFileProcessingFail();
+                System.IO.Directory.CreateDirectory(destFolder);
+                File.Copy(sourceFilePath, Path.Combine(destFolder, fileName), true);
 
-                    destFolder = Path.Combine(CurrentSession.TargetPath, "Failed");
-                    System.IO.Directory.CreateDirectory(destFolder);
-                }
-
-                if (lastDate.Date != createdDateTime.Date || destFolder == null)
-                {
-                    destFolder = Path.Combine(CurrentSession.TargetPath,
-                                                CurrentSession.CreateFolderForYear ? createdDateTime.Year.ToString() : string.Empty,
-                                                CurrentSession.CreateFolderForMonth ? createdDateTime.Month.ToString().PadLeft(2, '0') : string.Empty,
-                                                createdDateTime.Year.ToString() + CurrentSession.DateSeperator +
-                                                createdDateTime.Month.ToString().PadLeft(2, '0') + CurrentSession.DateSeperator +
-                                                createdDateTime.Day.ToString().PadLeft(2, '0'));
-
-                    System.IO.Directory.CreateDirectory(destFolder);
-
-                    lastDate = createdDateTime;
-                }
-
-                string destFilePath = Path.Combine(destFolder, fileName);
-                File.Copy(sourceFilePath, destFilePath, true);
-
-                CurrentSession.HandleFileProcessingSucess(destFolder);
+                CurrentSession.HandleFileMovingSuccess(destFolder);
 
             }
             catch (Exception)

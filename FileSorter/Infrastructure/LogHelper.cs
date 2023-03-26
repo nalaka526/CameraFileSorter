@@ -22,9 +22,9 @@
         public static string GetSessionStatusMessage(Session session)
         {
             if (session.FailedFilesCount == 0)
-                return $"{session.SuccessFilesCount} files sorted successfully";
+                return $"{session.SuccessFilesCount} file(s) sorted successfully";
             else
-                return $"{session.SuccessFilesCount} files sorted successfully, {session.FailedFilesCount} files failed";
+                return $"{session.SuccessFilesCount} file(s) sorted successfully, {session.FailedFilesCount} file(s) failed";
         }
 
 
