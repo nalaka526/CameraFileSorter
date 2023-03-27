@@ -109,12 +109,6 @@ namespace ImageFileSorter
             {
                 sourcePath = fbd.SelectedPath;
                 txtSourceFolder.Text = sourcePath;
-
-                if (string.IsNullOrEmpty(targetPath))
-                {
-                    targetPath = fbd.SelectedPath;
-                    txtTargetFolder.Text = sourcePath;
-                }
             }
         }
 
@@ -203,7 +197,7 @@ namespace ImageFileSorter
                 return false;
             }
 
-            if (sourcePath.StartsWith(targetPath) || targetPath.StartsWith(sourcePath))
+            if (targetPath == sourcePath)
             {
                 Log(LogHelper.GetSeperaotor());
                 LogWarning(LogHelper.GetValidationInvalidFolderPathsMessage());
