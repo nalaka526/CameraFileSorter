@@ -2,6 +2,7 @@
 using ImageFileSorter.Infrastructure.FileTypeInfo;
 using MetadataExtractor;
 using MetadataExtractor.Formats.FileType;
+using MetadataExtractor.Util;
 
 namespace ImageFileSorter
 {
@@ -39,18 +40,6 @@ namespace ImageFileSorter
 
                 ProcessFile(fileName);
             }
-
-            //string[] subdirectoryEntries = System.IO.Directory.GetDirectories(targetDirectory);
-            //foreach (string subdirectory in subdirectoryEntries)
-            //{
-            //    if (Worker.CancellationPending == true)
-            //    {
-            //        return;
-            //    }
-
-            //    ProcessDirectory(subdirectory);
-            //}
-
         }
 
         public void ProcessFile(string sourceFilePath)
@@ -68,56 +57,84 @@ namespace ImageFileSorter
 
                 if (string.IsNullOrWhiteSpace(fileExt) || !fileTypeInfoList.Exists(e => e.FileExtentions.Contains(fileExt)))
                 {
-                    destFolder = Path.Combine(CurrentSession.TargetPath, "NotHandled");
+                    destFolder = GetSkipDestinationPath();
                     CurrentSession.HandleFileSkip();
+                    MoveFile(sourceFilePath, fileName, destFolder);
+                    return;
                 }
-                else
+
+                var fileTypeInfo = GetFileTypeInfo(sourceFilePath);
+
+                if (fileTypeInfo == null)
                 {
-                    IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(sourceFilePath);
-
-                    var fileType = directories.OfType<FileTypeDirectory>().FirstOrDefault()?.GetDescription(FileTypeDirectory.TagDetectedFileTypeName);
-
-                    var fileTypeInfo = fileTypeInfoList.Where(e => e.FileTypeName == fileType).FirstOrDefault();
-
-                    if (fileTypeInfo == null)
-                    {
-                        destFolder = Path.Combine(CurrentSession.TargetPath, "NotHandled");
-                        CurrentSession.HandleFileSkip();
-                    }
-                    else
-                    {
-                        var createdDateTime = fileTypeInfo.GetFileCreatedDateTime(directories);
-
-                        if (createdDateTime == default || createdDateTime < new DateTime(1900, 1, 1))
-                        {
-                            destFolder = Path.Combine(CurrentSession.TargetPath, "Failed");
-                            CurrentSession.HandleFileProcessingFail();
-                        }
-                        else if (lastDate.Date != createdDateTime.Date || destFolder == null)
-                        {
-                            destFolder = destFolder = Path.Combine(CurrentSession.TargetPath,
-                                            CurrentSession.CreateFolderForYear ? createdDateTime.Year.ToString() : string.Empty,
-                                            CurrentSession.CreateFolderForMonth ? createdDateTime.Month.ToString().PadLeft(2, '0') : string.Empty,
-                                            createdDateTime.Year.ToString() + CurrentSession.DateSeperator +
-                                            createdDateTime.Month.ToString().PadLeft(2, '0') + CurrentSession.DateSeperator +
-                                            createdDateTime.Day.ToString().PadLeft(2, '0'));
-                            CurrentSession.HandleFileProcessingSucess();
-                            lastDate = createdDateTime;
-                        }
-                    }
+                    destFolder = destFolder = GetSkipDestinationPath();
+                    CurrentSession.HandleFileSkip();
+                    MoveFile(sourceFilePath, fileName, destFolder);
+                    return;
                 }
 
-                System.IO.Directory.CreateDirectory(destFolder);
-                File.Copy(sourceFilePath, Path.Combine(destFolder, fileName), true);
+                DateTime createdDateTime = GetFileCreatedDateTime(sourceFilePath, fileTypeInfo);
 
-                CurrentSession.HandleFileMovingSuccess(destFolder);
-
+                if (createdDateTime == default || createdDateTime < new DateTime(1900, 1, 1))
+                {
+                    destFolder = GetFailedDestinationPath();
+                    CurrentSession.HandleFileProcessingFail();
+                    MoveFile(sourceFilePath, fileName, destFolder);
+                }
+                else if (lastDate.Date != createdDateTime.Date || destFolder == null)
+                {
+                    destFolder = GetSuccessDestinationPath(createdDateTime);
+                    CurrentSession.HandleFileProcessingSuccess();
+                    MoveFile(sourceFilePath, fileName, destFolder);
+                    lastDate = createdDateTime;
+                }
             }
             catch (Exception)
             {
                 CurrentSession.HandleFileProcessingError();
                 return;
             }
+        }
+
+        private string GetSuccessDestinationPath(DateTime createdDateTime)
+        {
+            return Path.Combine(CurrentSession.TargetPath,
+                            CurrentSession.CreateFolderForYear ? createdDateTime.Year.ToString() : string.Empty,
+                            CurrentSession.CreateFolderForMonth ? createdDateTime.Month.ToString().PadLeft(2, '0') : string.Empty,
+                            createdDateTime.Year.ToString() + CurrentSession.DateSeperator +
+                            createdDateTime.Month.ToString().PadLeft(2, '0') + CurrentSession.DateSeperator +
+                            createdDateTime.Day.ToString().PadLeft(2, '0'));
+        }
+
+        private string GetSkipDestinationPath()
+        {
+            return Path.Combine(CurrentSession.TargetPath, "NotHandled");
+        }
+
+        private string GetFailedDestinationPath()
+        {
+            return Path.Combine(CurrentSession.TargetPath, "Failed");
+        }
+
+        private static DateTime GetFileCreatedDateTime(string filePath, IFileTypeInfo fileTypeInfo)
+        {
+            IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(filePath);
+            return fileTypeInfo.GetFileCreatedDateTime(directories);
+        }
+
+        private IFileTypeInfo? GetFileTypeInfo(string filePath)
+        {
+            IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(filePath);
+            var fileType = directories.OfType<FileTypeDirectory>().FirstOrDefault()?.GetDescription(FileTypeDirectory.TagDetectedFileTypeName);
+            return fileTypeInfoList.Where(e => e.FileTypeName == fileType).FirstOrDefault();
+        }
+
+        private void MoveFile(string sourceFilePath, string fileName, string destFolder)
+        {
+            System.IO.Directory.CreateDirectory(destFolder);
+            File.Copy(sourceFilePath, Path.Combine(destFolder, fileName), true);
+
+            CurrentSession.HandleFileMovingSuccess(destFolder);
         }
     }
 }

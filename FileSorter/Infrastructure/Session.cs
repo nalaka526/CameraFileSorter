@@ -45,7 +45,7 @@ namespace ImageFileSorter.Infrastructure
             Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingErrorMessage(currentFileIndex), false));
         }
 
-        public void HandleFileProcessingSucess()
+        public void HandleFileProcessingSuccess()
         {
             SuccessFilesCount++;
         }
