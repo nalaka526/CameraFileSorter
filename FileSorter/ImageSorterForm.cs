@@ -113,7 +113,10 @@ namespace ImageFileSorter
             {
                 sourcePath = fbd.SelectedPath;
                 txtSourceFolder.Text = sourcePath;
-                txtTargetFolder.Text = sourcePath + "_sorted";
+
+                var suggestedTargetPath = fbd.SelectedPath + "_sorted";
+                targetPath = suggestedTargetPath;
+                txtTargetFolder.Text = suggestedTargetPath;
             }
         }
 
