@@ -90,7 +90,11 @@ namespace ImageFileSorter
             }
             else
             {
-                Log(LogHelper.GetSessionStatusMessage(currentSession));
+                if (currentSession.IsSucceeded())
+                    Log(LogHelper.GetSessionSucessMessage(currentSession.SuccessFilesCount));
+                else
+                    Log(LogHelper.GetSessionFailedMessage(currentSession.SuccessFilesCount, currentSession.FailedFilesCount));
+
                 Log(LogHelper.GetSessionSucessMessage());
             }
         }
@@ -109,6 +113,7 @@ namespace ImageFileSorter
             {
                 sourcePath = fbd.SelectedPath;
                 txtSourceFolder.Text = sourcePath;
+                txtTargetFolder.Text = sourcePath + "_sorted";
             }
         }
 

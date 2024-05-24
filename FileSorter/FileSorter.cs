@@ -2,7 +2,6 @@
 using ImageFileSorter.Infrastructure.FileTypeInfo;
 using MetadataExtractor;
 using MetadataExtractor.Formats.FileType;
-using MetadataExtractor.Util;
 
 namespace ImageFileSorter
 {
@@ -95,7 +94,7 @@ namespace ImageFileSorter
                 return;
             }
         }
-
+        
         private string GetSuccessDestinationPath(DateTime createdDateTime)
         {
             return Path.Combine(CurrentSession.TargetPath,

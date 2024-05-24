@@ -19,14 +19,11 @@
         public static string GetSessionErrorMessage()
             => "Sorting canceled";
 
-        public static string GetSessionStatusMessage(Session session)
-        {
-            if (session.FailedFilesCount == 0)
-                return $"{session.SuccessFilesCount} file(s) sorted successfully";
-            else
-                return $"{session.SuccessFilesCount} file(s) sorted successfully, {session.FailedFilesCount} file(s) failed";
-        }
+        public static string GetSessionSucessMessage(int successFilesCount)
+            => $"{successFilesCount} file(s) sorted successfully";
 
+        public static string GetSessionFailedMessage(int successFilesCount, int failedFilesCount)
+            => $"{successFilesCount} file(s) sorted successfully, {failedFilesCount} file(s) failed";
 
         public static string GetSessionSucessMessage()
             => "Sorting completed";

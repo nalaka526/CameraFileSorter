@@ -59,5 +59,10 @@ namespace ImageFileSorter.Infrastructure
         {
             Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingErrorMessage(currentFileIndex), false));
         }
+
+        public bool IsSucceeded()
+        {
+            return FailedFilesCount == 0;
+        }
     }
 }
