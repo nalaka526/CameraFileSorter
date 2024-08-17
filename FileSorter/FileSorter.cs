@@ -7,16 +7,20 @@ namespace ImageFileSorter
 {
     internal class FileSorter
     {
-        readonly Session CurrentSession;
+        readonly Session currentSession;
         int fileCount;
 
-        List<IFileTypeInfo> fileTypeInfoList = new();
+        List<IFileTypeInfo> fileTypeInfoList = [];
         DateTime lastDate = default;
 
+        private readonly string skipDestinationPath;
+        private readonly string failedDestinationPath;
 
         public FileSorter(Session currentSession)
         {
-            CurrentSession = currentSession;
+            this.currentSession = currentSession;
+            skipDestinationPath = GetSkipDestinationPath();
+            failedDestinationPath = GetFailedDestinationPath();
         }
 
         public void Sort()
@@ -24,15 +28,15 @@ namespace ImageFileSorter
             fileCount = 0;
             fileTypeInfoList = new List<IFileTypeInfo> { new JpegInfo(), new Mp4Info() };
 
-            ProcessDirectory(CurrentSession.SourcePath);
+            ProcessDirectory(currentSession.SourcePath);
         }
 
-        public void ProcessDirectory(string targetDirectory)
+        private void ProcessDirectory(string targetDirectory)
         {
             string[] fileEntries = System.IO.Directory.GetFiles(targetDirectory);
             foreach (string fileName in fileEntries)
             {
-                if (CurrentSession.Worker.CancellationPending == true)
+                if (currentSession.Worker.CancellationPending == true)
                 {
                     return;
                 }
@@ -41,7 +45,7 @@ namespace ImageFileSorter
             }
         }
 
-        public void ProcessFile(string sourceFilePath)
+        private void ProcessFile(string sourceFilePath)
         {
             fileCount++;
 
@@ -49,16 +53,15 @@ namespace ImageFileSorter
 
             try
             {
-                CurrentSession.HandleFileProcessingStart(fileCount, fileName);
+                this.currentSession.HandleFileProcessingStart(fileCount, fileName);
 
                 string? destFolder = null;
                 string fileExt = Path.GetExtension(sourceFilePath);
 
                 if (string.IsNullOrWhiteSpace(fileExt) || !fileTypeInfoList.Exists(e => e.FileExtentions.Contains(fileExt)))
                 {
-                    destFolder = GetSkipDestinationPath();
-                    CurrentSession.HandleFileSkip();
-                    MoveFile(sourceFilePath, fileName, destFolder);
+                    this.currentSession.HandleFileSkip();
+                    MoveFile(sourceFilePath, fileName, skipDestinationPath);
                     return;
                 }
 
@@ -66,9 +69,8 @@ namespace ImageFileSorter
 
                 if (fileTypeInfo == null)
                 {
-                    destFolder = destFolder = GetSkipDestinationPath();
-                    CurrentSession.HandleFileSkip();
-                    MoveFile(sourceFilePath, fileName, destFolder);
+                    currentSession.HandleFileSkip();
+                    MoveFile(sourceFilePath, fileName, skipDestinationPath);
                     return;
                 }
 
@@ -76,43 +78,42 @@ namespace ImageFileSorter
 
                 if (createdDateTime == default || createdDateTime < new DateTime(1900, 1, 1))
                 {
-                    destFolder = GetFailedDestinationPath();
-                    CurrentSession.HandleFileProcessingFail();
-                    MoveFile(sourceFilePath, fileName, destFolder);
+                    currentSession.HandleFileProcessingFail();
+                    MoveFile(sourceFilePath, fileName, failedDestinationPath);
                 }
                 else if (lastDate.Date != createdDateTime.Date || destFolder == null)
                 {
                     destFolder = GetSuccessDestinationPath(createdDateTime);
-                    CurrentSession.HandleFileProcessingSuccess();
+                    currentSession.HandleFileProcessingSuccess();
                     MoveFile(sourceFilePath, fileName, destFolder);
                     lastDate = createdDateTime;
                 }
             }
             catch (Exception)
             {
-                CurrentSession.HandleFileProcessingError();
+                currentSession.HandleFileProcessingError();
                 return;
             }
         }
-        
+
         private string GetSuccessDestinationPath(DateTime createdDateTime)
         {
-            return Path.Combine(CurrentSession.TargetPath,
-                            CurrentSession.CreateFolderForYear ? createdDateTime.Year.ToString() : string.Empty,
-                            CurrentSession.CreateFolderForMonth ? createdDateTime.Month.ToString().PadLeft(2, '0') : string.Empty,
-                            createdDateTime.Year.ToString() + CurrentSession.DateSeperator +
-                            createdDateTime.Month.ToString().PadLeft(2, '0') + CurrentSession.DateSeperator +
+            return Path.Combine(currentSession.TargetPath,
+                            currentSession.CreateFolderForYear ? createdDateTime.Year.ToString() : string.Empty,
+                            currentSession.CreateFolderForMonth ? createdDateTime.Month.ToString().PadLeft(2, '0') : string.Empty,
+                            createdDateTime.Year.ToString() + currentSession.DateSeperator +
+                            createdDateTime.Month.ToString().PadLeft(2, '0') + currentSession.DateSeperator +
                             createdDateTime.Day.ToString().PadLeft(2, '0'));
         }
 
         private string GetSkipDestinationPath()
         {
-            return Path.Combine(CurrentSession.TargetPath, "NotHandled");
+            return Path.Combine(currentSession.TargetPath, "NotHandled");
         }
 
         private string GetFailedDestinationPath()
         {
-            return Path.Combine(CurrentSession.TargetPath, "Failed");
+            return Path.Combine(currentSession.TargetPath, "Failed");
         }
 
         private static DateTime GetFileCreatedDateTime(string filePath, IFileTypeInfo fileTypeInfo)
@@ -133,7 +134,7 @@ namespace ImageFileSorter
             System.IO.Directory.CreateDirectory(destFolder);
             File.Copy(sourceFilePath, Path.Combine(destFolder, fileName), true);
 
-            CurrentSession.HandleFileMovingSuccess(destFolder);
+            currentSession.HandleFileMovingSuccess(destFolder);
         }
     }
 }
