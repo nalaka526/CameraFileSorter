@@ -1,7 +1,5 @@
-﻿using ImageFileSorter.Infrastructure;
-using ImageFileSorter.Infrastructure.FileTypeInfo;
-using MetadataExtractor;
-using MetadataExtractor.Formats.FileType;
+﻿using Image_File_Sorter;
+using ImageFileSorter.Infrastructure;
 
 namespace ImageFileSorter
 {
@@ -10,11 +8,12 @@ namespace ImageFileSorter
         readonly Session currentSession;
         int fileCount;
 
-        List<IFileTypeInfo> fileTypeInfoList = [];
         DateTime lastDate = default;
 
         private readonly string skipDestinationPath;
         private readonly string failedDestinationPath;
+
+        string? destFolder = null;
 
         public FileSorter(Session currentSession)
         {
@@ -25,15 +24,15 @@ namespace ImageFileSorter
 
         public void Sort()
         {
-            fileCount = 0;
-            fileTypeInfoList = new List<IFileTypeInfo> { new JpegInfo(), new Mp4Info() };
-
             ProcessDirectory(currentSession.SourcePath);
         }
 
         private void ProcessDirectory(string targetDirectory)
         {
-            string[] fileEntries = System.IO.Directory.GetFiles(targetDirectory);
+            string[] fileEntries = Directory.GetFiles(targetDirectory);
+
+            fileCount = 0;
+
             foreach (string fileName in fileEntries)
             {
                 if (currentSession.Worker.CancellationPending == true)
@@ -53,41 +52,32 @@ namespace ImageFileSorter
 
             try
             {
-                this.currentSession.HandleFileProcessingStart(fileCount, fileName);
+                currentSession.HandleFileProcessingStart(fileCount, fileName);
 
-                string? destFolder = null;
-                string fileExt = Path.GetExtension(sourceFilePath);
+                var (canRead, createdDateTime) = FileReader.GetCreatedDateTime(sourceFilePath);
 
-                if (string.IsNullOrWhiteSpace(fileExt) || !fileTypeInfoList.Exists(e => e.FileExtentions.Contains(fileExt)))
-                {
-                    this.currentSession.HandleFileSkip();
-                    MoveFile(sourceFilePath, fileName, skipDestinationPath);
-                    return;
-                }
-
-                var fileTypeInfo = GetFileTypeInfo(sourceFilePath);
-
-                if (fileTypeInfo == null)
+                if (!canRead)
                 {
                     currentSession.HandleFileSkip();
                     MoveFile(sourceFilePath, fileName, skipDestinationPath);
                     return;
                 }
 
-                DateTime createdDateTime = GetFileCreatedDateTime(sourceFilePath, fileTypeInfo);
-
                 if (createdDateTime == default || createdDateTime < new DateTime(1900, 1, 1))
                 {
                     currentSession.HandleFileProcessingFail();
                     MoveFile(sourceFilePath, fileName, failedDestinationPath);
+                    return;
                 }
-                else if (lastDate.Date != createdDateTime.Date || destFolder == null)
+
+                if (lastDate.Date != createdDateTime.Date || destFolder == null)
                 {
                     destFolder = GetSuccessDestinationPath(createdDateTime);
-                    currentSession.HandleFileProcessingSuccess();
-                    MoveFile(sourceFilePath, fileName, destFolder);
-                    lastDate = createdDateTime;
                 }
+
+                currentSession.HandleFileProcessingSuccess();
+                MoveFile(sourceFilePath, fileName, destFolder);
+                lastDate = createdDateTime;
             }
             catch (Exception)
             {
@@ -116,22 +106,9 @@ namespace ImageFileSorter
             return Path.Combine(currentSession.TargetPath, "Failed");
         }
 
-        private static DateTime GetFileCreatedDateTime(string filePath, IFileTypeInfo fileTypeInfo)
-        {
-            IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(filePath);
-            return fileTypeInfo.GetFileCreatedDateTime(directories);
-        }
-
-        private IFileTypeInfo? GetFileTypeInfo(string filePath)
-        {
-            IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(filePath);
-            var fileType = directories.OfType<FileTypeDirectory>().FirstOrDefault()?.GetDescription(FileTypeDirectory.TagDetectedFileTypeName);
-            return fileTypeInfoList.Where(e => e.FileTypeName == fileType).FirstOrDefault();
-        }
-
         private void MoveFile(string sourceFilePath, string fileName, string destFolder)
         {
-            System.IO.Directory.CreateDirectory(destFolder);
+            Directory.CreateDirectory(destFolder);
             File.Copy(sourceFilePath, Path.Combine(destFolder, fileName), true);
 
             currentSession.HandleFileMovingSuccess(destFolder);
