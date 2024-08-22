@@ -18,8 +18,8 @@ namespace ImageFileSorter
         public FileSorter(Session currentSession)
         {
             this.currentSession = currentSession;
-            skipDestinationPath = GetSkipDestinationPath();
-            failedDestinationPath = GetFailedDestinationPath();
+            skipDestinationPath = GetSkipFolderPath();
+            failedDestinationPath = GetFailedFolderPath();
         }
 
         public void Sort()
@@ -72,7 +72,7 @@ namespace ImageFileSorter
 
                 if (lastDate.Date != createdDateTime.Date || destFolder == null)
                 {
-                    destFolder = GetSuccessDestinationPath(createdDateTime);
+                    destFolder = GetTargetFolderPath(createdDateTime);
                 }
 
                 currentSession.HandleFileProcessingSuccess();
@@ -86,7 +86,7 @@ namespace ImageFileSorter
             }
         }
 
-        private string GetSuccessDestinationPath(DateTime createdDateTime)
+        private string GetTargetFolderPath(DateTime createdDateTime)
         {
             return Path.Combine(currentSession.TargetPath,
                             currentSession.CreateFolderForYear ? createdDateTime.Year.ToString() : string.Empty,
@@ -96,12 +96,12 @@ namespace ImageFileSorter
                             createdDateTime.Day.ToString().PadLeft(2, '0'));
         }
 
-        private string GetSkipDestinationPath()
+        private string GetSkipFolderPath()
         {
             return Path.Combine(currentSession.TargetPath, "NotHandled");
         }
 
-        private string GetFailedDestinationPath()
+        private string GetFailedFolderPath()
         {
             return Path.Combine(currentSession.TargetPath, "Failed");
         }
