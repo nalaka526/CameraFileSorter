@@ -109,7 +109,7 @@ namespace ImageFileSorter
         private void MoveFile(string sourceFilePath, string fileName, string destFolder)
         {
             Directory.CreateDirectory(destFolder);
-            File.Copy(sourceFilePath, Path.Combine(destFolder, fileName), true);
+            File.Move(sourceFilePath, Path.Combine(destFolder, fileName), true);
 
             currentSession.HandleFileMovingSuccess(destFolder);
         }

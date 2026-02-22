@@ -28,7 +28,6 @@ namespace ImageFileSorter
 
             txtSourceFolder.Text = sourcePath;
             txtTargetFolder.Text = targetPath;
-            txtTargetFolder.Text = targetPath;
         }
 
         #region Background Worker

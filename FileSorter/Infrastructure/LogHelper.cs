@@ -14,10 +14,10 @@
             => $"Target folder : {targetFolderPath}";
 
         public static string GetSessionCancelMessage()
-            => "Error occured";
+            => "Sorting canceled";
 
         public static string GetSessionErrorMessage()
-            => "Sorting canceled";
+            => "Error occured";
 
         public static string GetSessionSucessMessage(int successFilesCount)
             => $"{successFilesCount} file(s) sorted successfully";
@@ -36,7 +36,7 @@
             => "Empty folder locations";
 
         public static string GetValidationInvalidFolderPathsMessage()
-            => "Invalid Source and/or Target folde(r)";
+            => "Invalid Source and/or Target folder";
 
         public static string GetValidationInvalidSourceFolderPathMessage(string sourceFolderPath)
             => $"'{sourceFolderPath}' is not a valid folder.";

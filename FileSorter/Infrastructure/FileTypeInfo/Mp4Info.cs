@@ -6,7 +6,7 @@ namespace ImageFileSorter.Infrastructure.FileTypeInfo
     internal class Mp4Info : IFileTypeInfo
     {
         public string FileTypeName => "MP4";
-        public string FileExtentions => ".mp4";
+        public string FileExtensions => ".mp4";
         private static string DateFormat => "ddd MMM dd HH:mm:ss yyyy";
 
         public DateTime GetFileCreatedDateTime(IEnumerable<MetadataExtractor.Directory> directories)

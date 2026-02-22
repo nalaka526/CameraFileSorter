@@ -34,7 +34,7 @@ namespace Image_File_Sorter
 
         private static bool IsSupportedFileType(string fileExtention)
         {
-            return fileTypeInfoList.Exists(e => e.FileExtentions.Contains(fileExtention));
+            return fileTypeInfoList.Exists(e => e.FileExtensions.Contains(fileExtention));
         }
 
         private static IFileTypeInfo? GetFileTypeInfo(string filePath)
