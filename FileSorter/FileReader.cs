@@ -6,18 +6,17 @@ namespace Image_File_Sorter
 {
     internal static class FileReader
     {
-        static readonly List<IFileTypeInfo> fileTypeInfoList = [];
+        static readonly List<IFileTypeInfo> fileTypeInfos = new List<IFileTypeInfo> { new JpegInfo(), new Mp4Info() };
 
         static FileReader()
         {
-            fileTypeInfoList = new List<IFileTypeInfo> { new JpegInfo(), new Mp4Info() };
         }
 
         public static (bool canRead, DateTime createdDate) GetCreatedDateTime(string sourceFilePath)
         {
-            string fileExt = Path.GetExtension(sourceFilePath);
+            string fileExtension = Path.GetExtension(sourceFilePath);
 
-            if (string.IsNullOrWhiteSpace(fileExt) || !IsSupportedFileType(fileExt))
+            if (string.IsNullOrWhiteSpace(fileExtension) || !IsSupportedFileType(fileExtension))
             {
                 return (false, default(DateTime));
             }
@@ -32,22 +31,21 @@ namespace Image_File_Sorter
             return (true, GetFileCreatedDateTime(sourceFilePath, fileTypeInfo));
         }
 
-        private static bool IsSupportedFileType(string fileExtention)
+        private static bool IsSupportedFileType(string fileExtension)
         {
-            return fileTypeInfoList.Exists(e => e.FileExtentions.Contains(fileExtention));
+            return fileTypeInfos.Exists(e => e.FileExtentions.Contains(fileExtension));
         }
 
         private static IFileTypeInfo? GetFileTypeInfo(string filePath)
         {
             IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(filePath);
             var fileType = directories.OfType<FileTypeDirectory>().FirstOrDefault()?.GetDescription(FileTypeDirectory.TagDetectedFileTypeName);
-            return fileTypeInfoList.Where(e => e.FileTypeName == fileType).FirstOrDefault();
+            return fileTypeInfos.FirstOrDefault(e => e.FileTypeName == fileType);
         }
 
         private static DateTime GetFileCreatedDateTime(string filePath, IFileTypeInfo fileTypeInfo)
         {
-            IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(filePath);
-            return fileTypeInfo.GetFileCreatedDateTime(directories);
+            return fileTypeInfo.GetFileCreatedDateTime(ImageMetadataReader.ReadMetadata(filePath));
         }
     }
 }
