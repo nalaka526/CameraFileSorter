@@ -8,7 +8,7 @@ namespace ImageFileSorter
     {
         string? sourcePath;
         string? targetPath;
-        string? seperator;
+        string? separator;
 
         bool isProcessing;
         bool isCancelled;
@@ -37,7 +37,7 @@ namespace ImageFileSorter
         {
             worker = sender as BackgroundWorker;
 
-            if (sourcePath == null || targetPath == null || seperator == null || worker == null)
+            if (sourcePath == null || targetPath == null || separator == null || worker == null)
             {
                 isError = true;
                 return;
@@ -45,7 +45,7 @@ namespace ImageFileSorter
 
             currentSession = new Session(sourcePath,
                                                     targetPath,
-                                                    seperator,
+                                                    separator,
                                                     chkYearFolder.Checked,
                                                     chkMonthFolder.Checked,
                                                     worker);
@@ -61,7 +61,7 @@ namespace ImageFileSorter
             if (e.UserState is not UserState state)
                 return;
 
-            if (state.IsSucess)
+            if (state.IsSuccess)
             {
                 Log($"{state.Message}");
             }
@@ -156,14 +156,14 @@ namespace ImageFileSorter
                 {
                     if (ValidateProcessStart())
                     {
-                        Log(LogHelper.GetSeperaotor());
+                        Log(LogHelper.GetSeparator());
                         Log(LogHelper.GetSessionStartMessage());
                         Log(LogHelper.GetSourceFolderPathMessage(sourcePath));
                         Log(LogHelper.GetSTargetFolderPathMessage(targetPath));
 
                         isCancelled = false;
                         isProcessing = true;
-                        seperator = cmbDateSeperator.SelectedValue.ToString();
+                        separator = cmbDateSeperator.SelectedValue.ToString();
                         btnProcess.Text = "Stop Sorting";
 
                         this.backgroundWorker.RunWorkerAsync();
@@ -203,21 +203,21 @@ namespace ImageFileSorter
 
             if (string.IsNullOrWhiteSpace(sourcePath) || string.IsNullOrWhiteSpace(targetPath))
             {
-                Log(LogHelper.GetSeperaotor());
+                Log(LogHelper.GetSeparator());
                 LogWarning(LogHelper.GetValidationEmptyFolderPathsMessage());
                 return false;
             }
 
             if (targetPath == sourcePath)
             {
-                Log(LogHelper.GetSeperaotor());
+                Log(LogHelper.GetSeparator());
                 LogWarning(LogHelper.GetValidationInvalidFolderPathsMessage());
                 return false;
             }
 
             if (!Directory.Exists(sourcePath))
             {
-                Log(LogHelper.GetSeperaotor());
+                Log(LogHelper.GetSeparator());
                 LogWarning(LogHelper.GetValidationInvalidSourceFolderPathMessage(sourcePath));
                 return false;
             }

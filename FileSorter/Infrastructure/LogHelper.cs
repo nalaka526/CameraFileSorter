@@ -54,8 +54,8 @@
         public static string GetFileProcessingSucessMessage(int fileIndex, string destinationFolder)
             => $"{DateTime.Now:HH:mm:ss:fff} : File {fileIndex} : Copied to '{destinationFolder}'";
 
-        public static string GetFileProcessingErrorMessage(int fileIndex)
-            => $"{DateTime.Now:HH:mm:ss:fff} : File {fileIndex} : Error occured while sorting file";
+        public static string GetFileProcessingErrorMessage(int fileIndex, string? exceptionMessage = null)
+            => $"{DateTime.Now:HH:mm:ss:fff} : File {fileIndex} : Error occured while sorting file{(exceptionMessage != null ? $" : {exceptionMessage}" : string.Empty)}";
 
         public static string GetFileSkippedMessage(int fileIndex)
             => $"{DateTime.Now:HH:mm:ss:fff} : File {fileIndex} : Unsupported file type";
@@ -64,7 +64,7 @@
 
         #region Other
 
-        public static string GetSeperaotor()
+        public static string GetSeparator()
             => "-----------------------------------------------------------------------------------------------";
 
         #endregion

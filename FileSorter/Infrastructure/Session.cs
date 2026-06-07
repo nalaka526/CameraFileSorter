@@ -8,7 +8,7 @@ namespace ImageFileSorter.Infrastructure
         internal string SourcePath { get; set; }
         internal string TargetPath { get; set; }
 
-        internal string DateSeperator { get; set; }
+        internal string DateSeparator { get; set; }
         internal bool CreateFolderForYear { get; set; }
         internal bool CreateFolderForMonth { get; set; }
 
@@ -18,13 +18,13 @@ namespace ImageFileSorter.Infrastructure
         public int SuccessFilesCount;
         public int FailedFilesCount;
 
-        public Session(string sourcePath, string targetPath, string dateSeperator, bool createFolderForYear,  bool createFolderForMonth, BackgroundWorker worker)
+        public Session(string sourcePath, string targetPath, string dateSeparator, bool createFolderForYear,  bool createFolderForMonth, BackgroundWorker worker)
         {
             SourcePath = sourcePath;
             TargetPath = targetPath;
             CreateFolderForYear = createFolderForYear;
             CreateFolderForMonth = createFolderForMonth;
-            DateSeperator = dateSeperator;
+            DateSeparator = dateSeparator;
             Worker = worker;
         }
 
@@ -36,13 +36,13 @@ namespace ImageFileSorter.Infrastructure
 
         public void HandleFileSkip()
         {
-            Worker.ReportProgress(0, new UserState(LogHelper.GetFileSkippedMessage(currentFileIndex), isSucess: false, isWarning: true));
+            Worker.ReportProgress(0, new UserState(LogHelper.GetFileSkippedMessage(currentFileIndex), isSuccess: false, isWarning: true));
         }
 
         public void HandleFileProcessingFail()
         {
             FailedFilesCount++;
-            Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingErrorMessage(currentFileIndex), false));
+            Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingErrorMessage(currentFileIndex), isSuccess: false));
         }
 
         public void HandleFileProcessingSuccess()
@@ -50,15 +50,15 @@ namespace ImageFileSorter.Infrastructure
             SuccessFilesCount++;
         }
 
-        public void HandleFileMovingSuccess(string destinationFolder)
+        public void HandleFileCopyingSuccess(string destinationFolder)
         {
             Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingSucessMessage(currentFileIndex, destinationFolder)));
         }
 
-        public void HandleFileProcessingError()
+        public void HandleFileProcessingError(string? exceptionMessage = null)
         {
             FailedFilesCount++;
-            Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingErrorMessage(currentFileIndex), false));
+            Worker.ReportProgress(0, new UserState(LogHelper.GetFileProcessingErrorMessage(currentFileIndex, exceptionMessage), isSuccess: false));
         }
 
         public bool IsSucceeded()

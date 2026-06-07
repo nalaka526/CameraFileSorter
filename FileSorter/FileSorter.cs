@@ -79,9 +79,9 @@ namespace ImageFileSorter
                 CopyFile(sourceFilePath, fileName, destFolder);
                 lastDate = createdDateTime;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                currentSession.HandleFileProcessingError();
+                currentSession.HandleFileProcessingError(ex.Message);
                 return;
             }
         }
@@ -91,8 +91,8 @@ namespace ImageFileSorter
             return Path.Combine(currentSession.TargetPath,
                             currentSession.CreateFolderForYear ? createdDateTime.Year.ToString() : string.Empty,
                             currentSession.CreateFolderForMonth ? createdDateTime.Month.ToString().PadLeft(2, '0') : string.Empty,
-                            createdDateTime.Year.ToString() + currentSession.DateSeperator +
-                            createdDateTime.Month.ToString().PadLeft(2, '0') + currentSession.DateSeperator +
+                            createdDateTime.Year.ToString() + currentSession.DateSeparator +
+                            createdDateTime.Month.ToString().PadLeft(2, '0') + currentSession.DateSeparator +
                             createdDateTime.Day.ToString().PadLeft(2, '0'));
         }
 
@@ -111,7 +111,7 @@ namespace ImageFileSorter
             Directory.CreateDirectory(destFolder);
             File.Copy(sourceFilePath, Path.Combine(destFolder, fileName), true);
 
-            currentSession.HandleFileMovingSuccess(destFolder);
+            currentSession.HandleFileCopyingSuccess(destFolder);
         }
     }
 }

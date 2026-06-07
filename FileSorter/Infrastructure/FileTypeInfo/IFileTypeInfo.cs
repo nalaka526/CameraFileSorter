@@ -4,7 +4,7 @@
     {
         public string FileTypeName { get; }
 
-        public string FileExtentions { get; }
+        public IEnumerable<string> FileExtensions { get; }
 
         public DateTime GetFileCreatedDateTime(IEnumerable<MetadataExtractor.Directory> directories);
     }

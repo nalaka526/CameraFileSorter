@@ -6,7 +6,7 @@ namespace ImageFileSorter.Infrastructure.FileTypeInfo
     internal class JpegInfo : IFileTypeInfo
     {
         public string FileTypeName => "JPEG";
-        public string FileExtentions => ".jpg.jpeg";
+        public IEnumerable<string> FileExtensions => [".jpg", ".jpeg"];
         private static string DateFormat => "yyyy:MM:dd HH:mm:ss";
 
         public DateTime GetFileCreatedDateTime(IEnumerable<MetadataExtractor.Directory> directories)
