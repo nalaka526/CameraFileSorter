@@ -59,14 +59,14 @@ namespace ImageFileSorter
                 if (!canRead)
                 {
                     currentSession.HandleFileSkip();
-                    MoveFile(sourceFilePath, fileName, skipDestinationPath);
+                    CopyFile(sourceFilePath, fileName, skipDestinationPath);
                     return;
                 }
 
                 if (createdDateTime == default || createdDateTime < new DateTime(1900, 1, 1))
                 {
                     currentSession.HandleFileProcessingFail();
-                    MoveFile(sourceFilePath, fileName, failedDestinationPath);
+                    CopyFile(sourceFilePath, fileName, failedDestinationPath);
                     return;
                 }
 
@@ -76,7 +76,7 @@ namespace ImageFileSorter
                 }
 
                 currentSession.HandleFileProcessingSuccess();
-                MoveFile(sourceFilePath, fileName, destFolder);
+                CopyFile(sourceFilePath, fileName, destFolder);
                 lastDate = createdDateTime;
             }
             catch (Exception)
@@ -106,7 +106,7 @@ namespace ImageFileSorter
             return Path.Combine(currentSession.TargetPath, "Failed");
         }
 
-        private void MoveFile(string sourceFilePath, string fileName, string destFolder)
+        private void CopyFile(string sourceFilePath, string fileName, string destFolder)
         {
             Directory.CreateDirectory(destFolder);
             File.Copy(sourceFilePath, Path.Combine(destFolder, fileName), true);

@@ -14,10 +14,10 @@
             => $"Target folder : {targetFolderPath}";
 
         public static string GetSessionCancelMessage()
-            => "Error occured";
+            => "Sorting canceled";
 
         public static string GetSessionErrorMessage()
-            => "Sorting canceled";
+            => "Error occured";
 
         public static string GetSessionSucessMessage(int successFilesCount)
             => $"{successFilesCount} file(s) sorted successfully";

@@ -38,7 +38,10 @@ namespace ImageFileSorter
             worker = sender as BackgroundWorker;
 
             if (sourcePath == null || targetPath == null || seperator == null || worker == null)
+            {
+                isError = true;
                 return;
+            }
 
             currentSession = new Session(sourcePath,
                                                     targetPath,
